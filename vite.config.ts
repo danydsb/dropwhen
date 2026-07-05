@@ -1,19 +1,54 @@
-import { defineConfig } from 'vite'
+import type { IncomingMessage, ServerResponse } from 'node:http'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
-  server: {
-    proxy: {
-      '/api/proxy/urban-comics': {
-        target: 'https://www.urban-comics.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/proxy\/urban-comics\/?/, '/'),
-      },
+function urbanComicsDevProxy(): Plugin {
+  return {
+    name: 'urban-comics-dev-proxy',
+    configureServer(server) {
+      server.middlewares.use(
+        '/api/urban-comics-proxy',
+        async (req: IncomingMessage, res: ServerResponse, next) => {
+          if (req.method !== 'GET' && req.method !== 'HEAD') {
+            next()
+            return
+          }
+
+          try {
+            const url = new URL(req.url ?? '/', 'http://localhost')
+            const pathParam = url.searchParams.get('path') ?? ''
+            url.searchParams.delete('path')
+            const target = new URL(`https://www.urban-comics.com/${pathParam}`)
+            target.search = url.search
+
+            const upstream = await fetch(target.toString(), {
+              headers: {
+                Accept: req.headers.accept ?? 'text/html',
+                'Accept-Language': 'fr-FR,fr;q=0.9',
+              },
+              redirect: 'follow',
+            })
+
+            res.statusCode = upstream.status
+            res.setHeader(
+              'Content-Type',
+              upstream.headers.get('content-type') ?? 'text/html; charset=utf-8',
+            )
+            res.end(await upstream.text())
+          } catch {
+            next()
+          }
+        },
+      )
     },
-  },
+  }
+}
+
+export default defineConfig({
   plugins: [
+    urbanComicsDevProxy(),
     react(),
     tailwindcss(),
     VitePWA({
@@ -55,7 +90,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\/api\/proxy\/urban-comics\/.*/i,
+            urlPattern: /\/api\/urban-comics-proxy/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'urban-comics-cache',

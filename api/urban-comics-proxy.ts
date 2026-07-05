@@ -4,8 +4,10 @@ export const config = {
 
 export default async function handler(request: Request): Promise<Response> {
   const incoming = new URL(request.url)
-  const suffix = incoming.pathname.replace(/^\/api\/proxy\/urban-comics\/?/, '')
-  const target = new URL(`https://www.urban-comics.com/${suffix}`)
+  const pathParam = incoming.searchParams.get('path') ?? ''
+  incoming.searchParams.delete('path')
+
+  const target = new URL(`https://www.urban-comics.com/${pathParam}`)
   target.search = incoming.search
 
   const upstream = await fetch(target.toString(), {

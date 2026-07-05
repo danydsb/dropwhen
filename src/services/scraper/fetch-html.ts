@@ -1,18 +1,23 @@
-const PROXY_ROUTES: Record<string, string> = {
-  'https://www.urban-comics.com': '/api/proxy/urban-comics',
-}
+const URBAN_COMICS_PROXY = '/api/urban-comics-proxy'
+const URBAN_COMICS_ORIGIN = 'https://www.urban-comics.com'
 
 const CACHE_TTL_MS = 5 * 60 * 1000
 const htmlCache = new Map<string, { html: string; expiresAt: number }>()
 const inFlight = new Map<string, Promise<string>>()
 
 function toProxiedUrl(url: string): string {
-  for (const [origin, prefix] of Object.entries(PROXY_ROUTES)) {
-    if (url.startsWith(origin)) {
-      return `${prefix}${url.slice(origin.length)}`
-    }
+  if (!url.startsWith(URBAN_COMICS_ORIGIN)) return url
+
+  const rest = url.slice(URBAN_COMICS_ORIGIN.length)
+  if (rest.startsWith('/?')) {
+    return `${URBAN_COMICS_PROXY}${rest.slice(1)}`
   }
-  return url
+  if (rest.startsWith('?')) {
+    return `${URBAN_COMICS_PROXY}${rest}`
+  }
+
+  const path = rest.replace(/^\//, '')
+  return `${URBAN_COMICS_PROXY}?path=${encodeURIComponent(path)}`
 }
 
 function readCache(url: string): string | null {
