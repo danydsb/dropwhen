@@ -1,5 +1,5 @@
 const PROXY_ROUTES: Record<string, string> = {
-  'https://www.urban-comics.com': '/proxy/urban-comics',
+  'https://www.urban-comics.com': '/api/proxy/urban-comics',
 }
 
 const CACHE_TTL_MS = 5 * 60 * 1000

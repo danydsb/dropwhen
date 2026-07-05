@@ -6,10 +6,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   server: {
     proxy: {
-      '/proxy/urban-comics': {
+      '/api/proxy/urban-comics': {
         target: 'https://www.urban-comics.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/proxy\/urban-comics/, ''),
+        rewrite: (path) => path.replace(/^\/api\/proxy\/urban-comics\/?/, '/'),
       },
     },
   },
@@ -55,7 +55,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\/proxy\/urban-comics\/.*/i,
+            urlPattern: /\/api\/proxy\/urban-comics\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'urban-comics-cache',
