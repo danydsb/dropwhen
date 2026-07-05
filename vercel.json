@@ -1,0 +1,12 @@
+{
+  "framework": "vite",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/proxy/urban-comics/:path*",
+      "destination": "https://www.urban-comics.com/:path*"
+    }
+  ]
+}

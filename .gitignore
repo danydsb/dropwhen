@@ -9,3 +9,4 @@ dist-ssr
 *.tsbuildinfo
 dev-dist
 pnpm-lock.yaml
+.vercel
