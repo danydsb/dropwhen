@@ -1,7 +1,7 @@
 {
   "name": "DropWhen",
   "short_name": "DropWhen",
-  "description": "Recherchez les dates de sortie de jeux, manga et BD/comics",
+  "description": "Recherchez les dates de sortie de jeux et BD/comics",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",

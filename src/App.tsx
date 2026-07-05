@@ -6,17 +6,29 @@ import { AppHeader } from './components/AppHeader'
 import { HeroSection } from './components/HeroSection'
 import { SearchPanel } from './components/SearchPanel'
 import { ResultList } from './components/ResultList'
+import { GamesCalendar } from './components/GamesCalendar'
 import { StatusBanner } from './components/StatusBanner'
 import { useSearch } from './hooks/useSearch'
+import { useGamesCalendar } from './hooks/useGamesCalendar'
 import { useGoogleCalendar } from './hooks/useGoogleCalendar'
+import { CONTENT_MAX_WIDTH } from './lib/layout'
 
 function App() {
   const { ui, locale } = useTranslation()
   const [category, setCategory] = useState<Category>('games')
   const [query, setQuery] = useState('')
   const demoMode = isDemoMode()
-  const { items, warning, loading, error, hasSearched, search } = useSearch()
+  const { items, warning, loading, error, hasSearched, search, clear, getLastParams } = useSearch()
   const { addEvent, error: calendarError, clearError } = useGoogleCalendar()
+
+  const showGamesCalendar = category === 'games' && !hasSearched && !demoMode
+  const {
+    sections: calendarSections,
+    loading: calendarLoading,
+    warning: calendarWarning,
+    error: calendarErrorState,
+    reload: reloadCalendar,
+  } = useGamesCalendar(showGamesCalendar)
 
   const handleSearch = useCallback(() => {
     void search(category, query)
@@ -25,9 +37,10 @@ function App() {
   const handleCategoryChange = useCallback(
     (next: Category) => {
       setCategory(next)
-      void search(next, query)
+      setQuery('')
+      clear()
     },
-    [query, search],
+    [clear],
   )
 
   useEffect(() => {
@@ -35,8 +48,16 @@ function App() {
   }, [demoMode, search])
 
   useEffect(() => {
-    if (hasSearched) void search(category, query)
-  }, [locale, hasSearched, category, query, search])
+    const last = getLastParams()
+    if (last) void search(last.category, last.query)
+  }, [locale, getLastParams, search])
+
+  useEffect(() => {
+    if (showGamesCalendar) reloadCalendar()
+  }, [locale, showGamesCalendar, reloadCalendar])
+
+  const activeWarning = showGamesCalendar ? calendarWarning : warning
+  const activeError = showGamesCalendar ? calendarErrorState : error
 
   return (
     <div className="relative min-h-dvh">
@@ -48,7 +69,7 @@ function App() {
 
       <AppHeader demoMode={demoMode} />
 
-      <main className="relative mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6 sm:py-12">
+      <main className={`relative mx-auto ${CONTENT_MAX_WIDTH} space-y-8 px-4 py-8 sm:space-y-10 sm:px-8 sm:py-12 lg:space-y-12`}>
         <HeroSection />
 
         <SearchPanel
@@ -62,20 +83,28 @@ function App() {
 
         <div className="space-y-3">
           {demoMode && <StatusBanner variant="info" message={ui.banners.demoActive} />}
-          {warning && !demoMode && <StatusBanner variant="warning" message={warning} />}
-          {error && <StatusBanner variant="error" message={error} />}
+          {activeWarning && !demoMode && <StatusBanner variant="warning" message={activeWarning} />}
+          {activeError && <StatusBanner variant="error" message={activeError} />}
           {calendarError && (
             <StatusBanner variant="error" message={calendarError} onDismiss={clearError} />
           )}
         </div>
 
-        <ResultList
-          items={items}
-          loading={loading}
-          hasSearched={hasSearched}
-          isDemoMode={demoMode}
-          onAddToCalendar={addEvent}
-        />
+        {showGamesCalendar ? (
+          <GamesCalendar
+            sections={calendarSections}
+            loading={calendarLoading}
+            onAddToCalendar={addEvent}
+          />
+        ) : (
+          <ResultList
+            items={items}
+            loading={loading}
+            hasSearched={hasSearched}
+            isDemoMode={demoMode}
+            onAddToCalendar={addEvent}
+          />
+        )}
       </main>
     </div>
   )

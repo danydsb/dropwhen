@@ -3,7 +3,6 @@ import type { UiMessages } from './types'
 export const en: UiMessages = {
   categories: {
     games: 'Video games',
-    manga: 'Manga',
     comics: 'Comics & graphic novels',
   },
 
@@ -14,13 +13,21 @@ export const en: UiMessages = {
 
   hero: {
     subtitle:
-      'Track upcoming game, manga and comic releases. Add them to your calendar in one click.',
+      'Discover upcoming video games and comics releases. Add them to your calendar in one click.',
     resultsCount: (count) => `${count} result${count === 1 ? '' : 's'}`,
+  },
+
+  gamesCalendar: {
+    title: 'Release calendar',
+    subtitle: 'Upcoming video games — next 6 months via RAWG',
+    emptyMonth: 'No releases scheduled this month.',
+    count: (count) => `${count} game${count === 1 ? '' : 's'}`,
   },
 
   search: {
     placeholder: 'Search for a release…',
     submit: 'Search',
+    hint: 'Press Enter or click Search.',
   },
 
   empty: {
@@ -31,10 +38,9 @@ export const en: UiMessages = {
   },
 
   card: {
-    datePrefix: 'Date',
     unknownDate: 'Unknown date',
     viewSource: 'View listing',
-    addToCalendar: 'Open in Google Calendar',
+    addToCalendar: 'Add',
     developer: 'Developer',
     publisher: 'Publisher',
   },
@@ -42,8 +48,6 @@ export const en: UiMessages = {
   dates: {
     unknown: 'Unknown date',
     tba: 'Release date TBA',
-    jpUnknown: 'JP release date unknown',
-    frUnknown: 'FR release date unknown',
     toConfirm: 'Date to be confirmed',
     untitled: 'Untitled',
     certainty: {
@@ -70,21 +74,22 @@ export const en: UiMessages = {
     rawgMissing:
       'RAWG API key missing. Get one at rawg.io/apidocs or keep VITE_DEMO_MODE=true.',
     rawgUnavailable: (detail) => `RAWG unavailable (${detail}).`,
-    jikanDates: 'Dates via MyAnimeList (Jikan).',
-    jikanUnavailable: (detail) => `Jikan unavailable (${detail}).`,
-    bdfugueEmpty: 'No BDfugue results.',
-    bdfugueOk: 'Data from BDfugue (CORS proxy).',
-    bdfugueUnavailable: (detail) => `BDfugue unavailable (${detail}).`,
+    gamesCalendarOk: 'Upcoming games calendar via RAWG.',
+    gamesCalendarEmpty: 'No upcoming games in the next 6 months.',
+    upcomingComicsEmpty: 'No BD/comics releases found.',
+    upcomingComicsOk: (sources) =>
+      `Upcoming releases via ${sources.join(', ')}.`,
+    upcomingComicsUnavailable: (detail) => `BD/comics sources unavailable (${detail}).`,
   },
 
   demo: {
     sourceRawg: 'RAWG (demo)',
-    sourceJikan: 'Jikan (demo)',
-    sourceBdfugue: 'BDfugue (demo)',
+    sourceUrbanComics: 'Urban Comics (demo)',
     multiPlatform: 'Multi-platform',
   },
 
   calendar: {
+    addedVia: 'Added via DropWhen',
     category: (label) => `Category: ${label}`,
     source: (name) => `Source: ${name}`,
     publisher: (name) => `Publisher / platform: ${name}`,

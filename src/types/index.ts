@@ -1,6 +1,4 @@
-export type Category = 'games' | 'manga' | 'comics'
-
-export type DateLocale = 'jp' | 'fr' | 'en' | 'unknown'
+export type Category = 'games' | 'comics'
 
 export type DateCertainty = 'confirmed' | 'estimated' | 'unknown'
 
@@ -10,7 +8,6 @@ export interface ReleaseItem {
   releaseDate?: string
   releaseDateLabel?: string
   dateCertainty: DateCertainty
-  dateLocale: DateLocale
   platformOrPublisher?: string
   genres?: string[]
   developer?: string

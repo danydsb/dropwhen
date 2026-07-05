@@ -1,5 +1,6 @@
 import { CalendarDays, FlaskConical } from 'lucide-react'
 import { useTranslation } from '../i18n'
+import { CONTENT_MAX_WIDTH } from '../lib/layout'
 import { LanguageSwitch } from './LanguageSwitch'
 
 export function AppHeader({ demoMode }: { demoMode: boolean }) {
@@ -7,7 +8,7 @@ export function AppHeader({ demoMode }: { demoMode: boolean }) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+      <div className={`mx-auto flex ${CONTENT_MAX_WIDTH} items-center justify-between gap-4 px-4 py-3 sm:px-8`}>
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-900/40">
             <CalendarDays className="h-4 w-4 text-white" aria-hidden />

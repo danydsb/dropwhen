@@ -22,13 +22,13 @@ export function SearchPanel({
   onSubmit: () => void
 }) {
   const { ui } = useTranslation()
-  const categories: Category[] = ['games', 'manga', 'comics']
+  const categories: Category[] = ['games', 'comics']
   const activeGradient = CATEGORY_GRADIENTS[category]
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/50 p-1 shadow-2xl shadow-black/40 backdrop-blur-sm sm:rounded-3xl sm:p-1.5">
       <ShineBorder
-        shineColor={['#8b5cf6', '#f43f5e', '#f59e0b', '#a78bfa']}
+        shineColor={['#8b5cf6', '#f59e0b', '#a78bfa']}
         duration={12}
         borderWidth={1}
       />
@@ -101,6 +101,7 @@ export function SearchPanel({
             </ShimmerButton>
           </div>
         </form>
+        <p className="mt-2 text-center text-xs text-slate-500">{ui.search.hint}</p>
       </div>
     </section>
   )

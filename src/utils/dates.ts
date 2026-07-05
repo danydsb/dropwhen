@@ -52,6 +52,45 @@ export function getCertaintyLabel(certainty: DateCertainty): string {
   return getUi().dates.certainty[certainty]
 }
 
+export function parseFrenchLongDate(text: string): string {
+  const FRENCH_MONTHS: Record<string, number> = {
+    janvier: 1,
+    fevrier: 2,
+    février: 2,
+    mars: 3,
+    avril: 4,
+    mai: 5,
+    juin: 6,
+    juillet: 7,
+    aout: 8,
+    août: 8,
+    septembre: 9,
+    octobre: 10,
+    novembre: 11,
+    decembre: 12,
+    décembre: 12,
+  }
+
+  const normalized = text
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
+
+  const match = normalized.match(
+    /(\d{1,2})\s+(janvier|fevrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre)\s+(\d{4})/,
+  )
+  if (!match) return ''
+
+  const day = Number(match[1])
+  const month = FRENCH_MONTHS[match[2]]
+  const year = Number(match[3])
+  if (!month) return ''
+
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
 export function normalizeSearchTerm(value: string): string {
   return value
     .normalize('NFD')

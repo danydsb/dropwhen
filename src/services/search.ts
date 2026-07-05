@@ -1,8 +1,7 @@
 import { isDemoMode } from '../config'
 import type { Category, SearchResult } from '../types'
 import { searchDemo } from '../data/demo-results'
-import { searchComics } from './bdfugue'
-import { searchManga } from './jikan'
+import { searchComics } from './releases'
 import { searchGames } from './rawg'
 
 export async function searchByCategory(
@@ -20,8 +19,6 @@ export async function searchByCategory(
   switch (category) {
     case 'games':
       return searchGames(trimmed)
-    case 'manga':
-      return searchManga(trimmed)
     case 'comics':
       return searchComics(trimmed)
   }

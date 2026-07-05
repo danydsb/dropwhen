@@ -4,6 +4,15 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  server: {
+    proxy: {
+      '/proxy/urban-comics': {
+        target: 'https://www.urban-comics.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/urban-comics/, ''),
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),
@@ -13,7 +22,7 @@ export default defineConfig({
       manifest: {
         name: 'DropWhen',
         short_name: 'DropWhen',
-        description: 'Recherchez les dates de sortie de jeux, manga et BD/comics',
+        description: 'Recherchez les dates de sortie de jeux et BD/comics',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',
@@ -46,11 +55,11 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^https:\/\/api\.jikan\.moe\/.*/i,
+            urlPattern: /\/proxy\/urban-comics\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'jikan-api-cache',
-              expiration: { maxEntries: 50, maxAgeSeconds: 3600 },
+              cacheName: 'urban-comics-cache',
+              expiration: { maxEntries: 30, maxAgeSeconds: 3600 },
             },
           },
         ],

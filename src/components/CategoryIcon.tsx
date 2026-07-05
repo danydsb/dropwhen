@@ -1,36 +1,23 @@
-import { BookOpen, Gamepad2, Library, type LucideIcon } from 'lucide-react'
+import { BookMarked, Gamepad2 } from 'lucide-react'
 import type { Category } from '../types'
 
-const CATEGORY_ICONS: Record<Category, LucideIcon> = {
+export const CATEGORY_ICONS = {
   games: Gamepad2,
-  manga: BookOpen,
-  comics: Library,
-}
+  comics: BookMarked,
+} as const
 
-const CATEGORY_ICON_COLORS: Record<Category, string> = {
+const ICON_COLORS: Record<Category, string> = {
   games: 'text-games-light',
-  manga: 'text-manga-light',
   comics: 'text-comics-light',
 }
 
 export function CategoryIcon({
   category,
-  size = 48,
-  className = '',
+  size = 20,
 }: {
   category: Category
   size?: number
-  className?: string
 }) {
   const Icon = CATEGORY_ICONS[category]
-  return (
-    <Icon
-      size={size}
-      strokeWidth={1.5}
-      aria-hidden
-      className={`${CATEGORY_ICON_COLORS[category]} ${className}`.trim()}
-    />
-  )
+  return <Icon size={size} className={ICON_COLORS[category]} aria-hidden />
 }
-
-export { CATEGORY_ICONS }

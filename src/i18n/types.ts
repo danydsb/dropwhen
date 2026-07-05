@@ -12,9 +12,16 @@ export type UiMessages = {
     subtitle: string
     resultsCount: (count: number) => string
   }
+  gamesCalendar: {
+    title: string
+    subtitle: string
+    emptyMonth: string
+    count: (count: number) => string
+  }
   search: {
     placeholder: string
     submit: string
+    hint: string
   }
   empty: {
     noResults: string
@@ -23,7 +30,6 @@ export type UiMessages = {
     hintDemo: string
   }
   card: {
-    datePrefix: string
     unknownDate: string
     viewSource: string
     addToCalendar: string
@@ -33,8 +39,6 @@ export type UiMessages = {
   dates: {
     unknown: string
     tba: string
-    jpUnknown: string
-    frUnknown: string
     toConfirm: string
     untitled: string
     certainty: Record<DateCertainty, string>
@@ -51,19 +55,19 @@ export type UiMessages = {
     demo: string
     rawgMissing: string
     rawgUnavailable: (detail: string) => string
-    jikanDates: string
-    jikanUnavailable: (detail: string) => string
-    bdfugueEmpty: string
-    bdfugueOk: string
-    bdfugueUnavailable: (detail: string) => string
+    gamesCalendarOk: string
+    gamesCalendarEmpty: string
+    upcomingComicsEmpty: string
+    upcomingComicsOk: (sources: string[]) => string
+    upcomingComicsUnavailable: (detail: string) => string
   }
   demo: {
     sourceRawg: string
-    sourceJikan: string
-    sourceBdfugue: string
+    sourceUrbanComics: string
     multiPlatform: string
   }
   calendar: {
+    addedVia: string
     category: (label: string) => string
     source: (name: string) => string
     publisher: (name: string) => string
@@ -79,4 +83,3 @@ export type UiMessages = {
     en: string
   }
 }
-

@@ -56,11 +56,6 @@ export function ResultCard({
 
           <p className="text-sm font-medium text-slate-300">
             {item.releaseDateLabel ?? ui.card.unknownDate}
-            {item.dateLocale !== 'unknown' && (
-              <span className="ml-2 text-xs font-normal uppercase text-slate-500">
-                {ui.card.datePrefix} {item.dateLocale}
-              </span>
-            )}
           </p>
 
           {item.platformOrPublisher && (
@@ -120,7 +115,7 @@ export function ResultCard({
           </div>
         </div>
 
-        <div className="shrink-0 sm:w-44">
+        <div className="shrink-0 sm:w-32">
           <button
             type="button"
             onClick={() => onAddToCalendar(item)}

@@ -3,7 +3,6 @@ import type { UiMessages } from './types'
 export const fr: UiMessages = {
   categories: {
     games: 'Jeux vidéo',
-    manga: 'Manga',
     comics: 'BD / Comics',
   },
 
@@ -14,13 +13,21 @@ export const fr: UiMessages = {
 
   hero: {
     subtitle:
-      'Repérez les prochaines sorties jeux, manga et BD. Ajoutez-les à votre agenda en un clic.',
+      'Repérez les prochaines sorties Jeux vidéos et BD / Comics. Ajoutez-les dans votre agenda en un clic.',
     resultsCount: (count) => `${count} résultat${count > 1 ? 's' : ''}`,
+  },
+
+  gamesCalendar: {
+    title: 'Calendrier des sorties',
+    subtitle: 'Jeux vidéo à venir — 6 prochains mois via RAWG',
+    emptyMonth: 'Aucune sortie prévue ce mois-ci.',
+    count: (count) => `${count} jeu${count > 1 ? 'x' : ''}`,
   },
 
   search: {
     placeholder: 'Rechercher une sortie…',
     submit: 'Chercher',
+    hint: 'Appuyez sur Entrée ou cliquez sur Chercher.',
   },
 
   empty: {
@@ -32,10 +39,9 @@ export const fr: UiMessages = {
   },
 
   card: {
-    datePrefix: 'Date',
     unknownDate: 'Date inconnue',
     viewSource: 'Fiche',
-    addToCalendar: 'Ouvrir dans Google Agenda',
+    addToCalendar: 'Ajouter',
     developer: 'Développeur',
     publisher: 'Éditeur',
   },
@@ -43,8 +49,6 @@ export const fr: UiMessages = {
   dates: {
     unknown: 'Date inconnue',
     tba: 'Date à confirmer (TBA)',
-    jpUnknown: 'Date JP inconnue',
-    frUnknown: 'Date FR inconnue',
     toConfirm: 'Date à confirmer',
     untitled: 'Sans titre',
     certainty: {
@@ -71,21 +75,22 @@ export const fr: UiMessages = {
     rawgMissing:
       'Clé API RAWG manquante. Obtenez-en une sur rawg.io/apidocs ou gardez VITE_DEMO_MODE=true.',
     rawgUnavailable: (detail) => `RAWG indisponible (${detail}).`,
-    jikanDates: 'Dates via MyAnimeList (Jikan).',
-    jikanUnavailable: (detail) => `Jikan indisponible (${detail}).`,
-    bdfugueEmpty: 'Aucun résultat BDfugue.',
-    bdfugueOk: 'Données via BDfugue (proxy CORS).',
-    bdfugueUnavailable: (detail) => `BDfugue indisponible (${detail}).`,
+    gamesCalendarOk: 'Calendrier des sorties jeux via RAWG.',
+    gamesCalendarEmpty: 'Aucun jeu à venir sur les 6 prochains mois.',
+    upcomingComicsEmpty: 'Aucune sortie BD/comics trouvée.',
+    upcomingComicsOk: (sources) =>
+      `Sorties à paraître via ${sources.join(', ')}.`,
+    upcomingComicsUnavailable: (detail) => `Sources BD/comics indisponibles (${detail}).`,
   },
 
   demo: {
     sourceRawg: 'RAWG (démo)',
-    sourceJikan: 'Jikan (démo)',
-    sourceBdfugue: 'BDfugue (démo)',
+    sourceUrbanComics: 'Urban Comics (démo)',
     multiPlatform: 'Multi-plateformes',
   },
 
   calendar: {
+    addedVia: 'Ajouté via DropWhen',
     category: (label) => `Catégorie : ${label}`,
     source: (name) => `Source : ${name}`,
     publisher: (name) => `Éditeur / plateforme : ${name}`,
