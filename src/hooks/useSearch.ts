@@ -1,4 +1,4 @@
-import { ui } from '../i18n'
+import { getUi } from '../i18n'
 import { useCallback, useState } from 'react'
 import type { ReleaseItem } from '../types'
 import type { Category } from '../types'
@@ -36,7 +36,7 @@ export function useSearch() {
         items: [],
         loading: false,
         hasSearched: true,
-        error: ui.errors.searchFailed,
+        error: getUi().errors.searchFailed,
       })
     }
   }, [])

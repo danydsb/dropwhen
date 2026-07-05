@@ -1,13 +1,12 @@
 import type { DateCertainty } from '../types'
-import { ui } from '../i18n'
-
-const DISPLAY_LOCALE = 'fr-FR'
+import { getIntlLocale, getLocale, getUi } from '../i18n'
 
 export function formatDisplayDate(isoDate?: string): string {
+  const ui = getUi()
   if (!isoDate) return ui.dates.unknown
   const date = new Date(isoDate)
   if (Number.isNaN(date.getTime())) return ui.dates.unknown
-  return new Intl.DateTimeFormat(DISPLAY_LOCALE, {
+  return new Intl.DateTimeFormat(getIntlLocale(getLocale()), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -50,7 +49,7 @@ export function isFutureOrToday(isoDate?: string): boolean {
 }
 
 export function getCertaintyLabel(certainty: DateCertainty): string {
-  return ui.dates.certainty[certainty]
+  return getUi().dates.certainty[certainty]
 }
 
 export function normalizeSearchTerm(value: string): string {

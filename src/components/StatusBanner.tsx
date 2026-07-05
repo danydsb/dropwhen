@@ -1,4 +1,4 @@
-import { ui } from '../i18n'
+import { useTranslation } from '../i18n'
 import { AlertCircle, AlertTriangle, Info, X } from 'lucide-react'
 
 const VARIANTS = {
@@ -25,7 +25,9 @@ export function StatusBanner({
   variant?: keyof typeof VARIANTS
   onDismiss?: () => void
 }) {
+  const { ui } = useTranslation()
   const { className, Icon } = VARIANTS[variant]
+
   return (
     <div className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${className}`}>
       <Icon size={18} className="mt-0.5 shrink-0" aria-hidden />

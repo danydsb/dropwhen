@@ -12,6 +12,10 @@ export interface ReleaseItem {
   dateCertainty: DateCertainty
   dateLocale: DateLocale
   platformOrPublisher?: string
+  genres?: string[]
+  developer?: string
+  publisher?: string
+  imageUrl?: string
   source: string
   sourceUrl?: string
   category: Category

@@ -46,10 +46,10 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^https:\/\/graphql\.anilist\.co\/.*/i,
+            urlPattern: /^https:\/\/api\.jikan\.moe\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'anilist-api-cache',
+              cacheName: 'jikan-api-cache',
               expiration: { maxEntries: 50, maxAgeSeconds: 3600 },
             },
           },

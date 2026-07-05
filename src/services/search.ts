@@ -2,7 +2,7 @@ import { isDemoMode } from '../config'
 import type { Category, SearchResult } from '../types'
 import { searchDemo } from '../data/demo-results'
 import { searchComics } from './bdfugue'
-import { searchManga } from './nautiljon'
+import { searchManga } from './jikan'
 import { searchGames } from './rawg'
 
 export async function searchByCategory(

@@ -1,4 +1,4 @@
-import { ui } from '../i18n'
+import { getUi } from '../i18n'
 import type { ReleaseItem, SearchResult } from '../types'
 import {
   formatDisplayDate,
@@ -25,6 +25,7 @@ function parseBdfugueProducts(html: string, section: ComicsSection): ReleaseItem
       product.textContent?.match(/\d{1,2}\/\d{1,2}\/\d{4}/)?.[0]
     const releaseDate = dateText ? parseFrenchDate(dateText) : undefined
 
+    const ui = getUi()
     items.push({
       id: `bdfugue-${section}-${index}-${title}`,
       title,
@@ -43,6 +44,7 @@ function parseBdfugueProducts(html: string, section: ComicsSection): ReleaseItem
 }
 
 export async function searchComics(query: string): Promise<SearchResult> {
+  const ui = getUi()
   try {
     const [bd, comics] = await Promise.all([
       fetchTextViaProxy('https://www.bdfugue.com/a-paraitre/bd').then((h) =>
