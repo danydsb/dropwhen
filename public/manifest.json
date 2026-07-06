@@ -4,8 +4,8 @@
   "description": "Recherchez les dates de sortie de jeux et BD/comics",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#fff4e5",
+  "theme_color": "#fff4e5",
   "lang": "fr",
   "icons": [
     {

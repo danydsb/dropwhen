@@ -198,7 +198,7 @@ async function fetchUpcomingGamesFromApi(
 
   return {
     items: unique.map((game) => mapRawgGame(game)),
-    warning: unique.length > 0 ? ui.warnings.gamesCalendarOk : ui.warnings.gamesCalendarEmpty,
+    warning: unique.length > 0 ? undefined : ui.warnings.gamesCalendarEmpty,
   }
 }
 

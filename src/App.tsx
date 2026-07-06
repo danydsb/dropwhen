@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { isDemoMode } from './config'
 import type { Category } from './types'
 import { LanguageSwitch } from './components/LanguageSwitch'
+import { ThemeSwitch } from './components/ThemeSwitch'
+import { RelaxBackground } from './components/RelaxBackground'
 import { HeroSection } from './components/HeroSection'
 import { SearchPanel } from './components/SearchPanel'
 import { ResultList } from './components/ResultList'
@@ -19,7 +21,7 @@ function App() {
   const [query, setQuery] = useState('')
   const demoMode = isDemoMode()
   const { items, warning, loading, error, hasSearched, search, clear, getLastParams } = useSearch()
-  const { addEvent, error: calendarError, clearError } = useGoogleCalendar()
+  const { addEvent } = useGoogleCalendar()
 
   const showGamesCalendar = category === 'games' && !hasSearched && !demoMode
   const {
@@ -60,18 +62,15 @@ function App() {
   const activeError = showGamesCalendar ? calendarErrorState : error
 
   return (
-    <div className="relative min-h-dvh">
-      <div className="pointer-events-none absolute inset-0 bg-grid" aria-hidden />
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(ellipse_at_top,rgb(91_33_182/0.25),transparent_70%)]"
-        aria-hidden
-      />
+    <div className="bg-background text-foreground relative min-h-dvh">
+      <RelaxBackground />
 
-      <div className="fixed right-4 top-4 z-50 sm:right-8">
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2 sm:right-8">
         <LanguageSwitch />
+        <ThemeSwitch />
       </div>
 
-      <main className={`relative mx-auto ${CONTENT_MAX_WIDTH} space-y-8 px-4 py-8 sm:space-y-10 sm:px-8 sm:py-12 lg:space-y-12`}>
+      <main className={`relative mx-auto ${CONTENT_MAX_WIDTH} space-y-6 px-4 py-8 sm:space-y-8 sm:px-8 sm:py-12 lg:space-y-10`}>
         <HeroSection />
 
         <SearchPanel
@@ -87,9 +86,6 @@ function App() {
           {demoMode && <StatusBanner variant="info" message={ui.banners.demoActive} />}
           {activeWarning && !demoMode && <StatusBanner variant="warning" message={activeWarning} />}
           {activeError && <StatusBanner variant="error" message={activeError} />}
-          {calendarError && (
-            <StatusBanner variant="error" message={calendarError} onDismiss={clearError} />
-          )}
         </div>
 
         {showGamesCalendar ? (

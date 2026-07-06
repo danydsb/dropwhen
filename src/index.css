@@ -1,13 +1,9 @@
 @import 'tailwindcss';
+@import '@heroui/styles';
+@import './styles/fonts.css';
+@import './styles/heroui-themes.css';
 
 @theme {
-  --color-games: #8b5cf6;
-  --color-games-light: #a78bfa;
-  --color-comics: #f59e0b;
-  --color-comics-light: #fbbf24;
-  --color-background: #020617;
-  --color-border: #334155;
-
   --animate-shiny-text: shiny-text 8s infinite;
   --animate-shine: shine var(--duration) infinite linear;
   --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
@@ -63,15 +59,6 @@
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  @apply bg-slate-950 text-slate-100 antialiased;
-}
-
-.bg-grid {
-  background-image:
-    linear-gradient(to right, rgb(148 163 184 / 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(148 163 184 / 0.06) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {

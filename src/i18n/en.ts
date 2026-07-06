@@ -65,7 +65,6 @@ export const en: UiMessages = {
   errors: {
     searchFailed: 'Search failed.',
     unexpected: 'Unexpected error.',
-    popupBlocked: 'Popup blocked — allow pop-ups to open Google Calendar.',
   },
 
   warnings: {
@@ -74,7 +73,6 @@ export const en: UiMessages = {
     rawgMissing:
       'RAWG API key missing. Get one at rawg.io/apidocs or keep VITE_DEMO_MODE=true.',
     rawgUnavailable: (detail) => `RAWG unavailable (${detail}).`,
-    gamesCalendarOk: 'Upcoming games calendar via RAWG.',
     gamesCalendarEmpty: 'No upcoming games in the next 6 months.',
     upcomingComicsEmpty: 'No BD/comics releases found.',
     upcomingComicsOk: (sources) =>
@@ -100,6 +98,13 @@ export const en: UiMessages = {
   a11y: {
     dismiss: 'Dismiss',
     languageSwitch: 'Language',
+    categorySwitch: 'Category',
+    themeSwitch: 'Theme',
+  },
+
+  theme: {
+    light: 'Light',
+    dark: 'Dark',
   },
 
   language: {

@@ -1,9 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { animate, createScope, stagger, splitText } from 'animejs'
 
-const TITLE_GRADIENT =
-  'bg-linear-to-r from-white via-violet-200 to-fuchsia-300 bg-clip-text text-transparent'
-
 export function AnimatedDropWhenTitle() {
   const rootRef = useRef<HTMLHeadingElement>(null)
 
@@ -19,7 +16,7 @@ export function AnimatedDropWhenTitle() {
     })
 
     for (const char of splitter.chars as HTMLElement[]) {
-      char.classList.add(...TITLE_GRADIENT.split(' '), 'cursor-default')
+      char.classList.add('text-accent', 'cursor-default')
     }
 
     let isAnimating = true
@@ -59,7 +56,7 @@ export function AnimatedDropWhenTitle() {
   return (
     <h1
       ref={rootRef}
-      className={`cursor-default overflow-visible text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl ${TITLE_GRADIENT}`}
+      className="font-display text-accent cursor-default overflow-visible text-4xl font-normal uppercase tracking-tight sm:text-5xl lg:text-6xl"
     >
       DropWhen
     </h1>

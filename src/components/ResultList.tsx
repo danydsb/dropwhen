@@ -1,4 +1,5 @@
 import { useTranslation } from '../i18n'
+import { Card } from '@heroui/react'
 import { CalendarSearch, SearchX, Sparkles } from 'lucide-react'
 import type { ReleaseItem } from '../types'
 import { ResultCard } from './ResultCard'
@@ -22,17 +23,16 @@ export function ResultList({
     return (
       <div className="space-y-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex animate-pulse gap-4 rounded-2xl border border-white/5 bg-slate-900/40 p-5"
-          >
-            <div className="h-16 w-16 shrink-0 rounded-xl bg-slate-800" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 w-2/3 rounded bg-slate-800" />
-              <div className="h-3 w-1/3 rounded bg-slate-800" />
-              <div className="h-9 w-36 rounded-xl bg-slate-800" />
-            </div>
-          </div>
+          <Card key={i}>
+            <Card.Content className="flex animate-pulse gap-4 p-5">
+              <div className="bg-default size-16 shrink-0 rounded-xl sm:size-[72px]" />
+              <div className="flex-1 space-y-2">
+                <div className="bg-default h-4 w-2/3 rounded" />
+                <div className="bg-default h-3 w-1/3 rounded" />
+                <div className="bg-default h-9 w-36 rounded-xl" />
+              </div>
+            </Card.Content>
+          </Card>
         ))}
       </div>
     )
@@ -40,32 +40,36 @@ export function ResultList({
 
   if (hasSearched && items.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-700/80 bg-slate-900/30 px-6 py-14 text-center">
-        <SearchX className="mx-auto mb-3 h-10 w-10 text-slate-600" aria-hidden />
-        <p className="text-lg font-semibold text-slate-300">{ui.empty.noResults}</p>
-        <p className="mt-1 text-sm text-slate-500">{ui.search.placeholder}</p>
-      </div>
+      <Card className="border-dashed text-center">
+        <Card.Content className="px-6 py-14">
+          <SearchX className="text-muted mx-auto mb-3 size-10" aria-hidden />
+          <h2 className="text-lg font-semibold">{ui.empty.noResults}</h2>
+          <p className="text-muted mt-1 text-sm">{ui.search.placeholder}</p>
+        </Card.Content>
+      </Card>
     )
   }
 
   if (!hasSearched) {
     return (
-      <div className="rounded-2xl border border-white/8 bg-slate-900/30 px-6 py-16 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-800/80">
-          <CalendarSearch className="h-7 w-7 text-violet-400" aria-hidden />
-        </div>
-        <p className="text-lg font-semibold text-white">{ui.empty.title}</p>
-        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-500">
-          {isDemoMode ? ui.empty.hintDemo : ui.empty.hint}
-        </p>
-      </div>
+      <Card className="text-center">
+        <Card.Content className="px-6 py-16">
+          <div className="bg-accent/15 mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl">
+            <CalendarSearch className="text-accent size-7" aria-hidden />
+          </div>
+          <h2 className="text-lg font-semibold">{ui.empty.title}</h2>
+          <p className="text-muted mx-auto mt-2 max-w-sm text-sm leading-relaxed">
+            {isDemoMode ? ui.empty.hintDemo : ui.empty.hint}
+          </p>
+        </Card.Content>
+      </Card>
     )
   }
 
   return (
     <section className="space-y-4">
-      <div className="flex items-center gap-2 text-sm text-slate-400">
-        <Sparkles size={14} className="text-violet-400" aria-hidden />
+      <div className="text-muted flex items-center gap-2 text-sm">
+        <Sparkles size={14} className="text-accent" aria-hidden />
         <span>{ui.hero.resultsCount(items.length)}</span>
       </div>
       <div className="space-y-3">

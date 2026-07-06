@@ -49,13 +49,11 @@ export type UiMessages = {
   errors: {
     searchFailed: string
     unexpected: string
-    popupBlocked: string
   }
   warnings: {
     demo: string
     rawgMissing: string
     rawgUnavailable: (detail: string) => string
-    gamesCalendarOk: string
     gamesCalendarEmpty: string
     upcomingComicsEmpty: string
     upcomingComicsOk: (sources: string[]) => string
@@ -77,6 +75,12 @@ export type UiMessages = {
   a11y: {
     dismiss: string
     languageSwitch: string
+    categorySwitch: string
+    themeSwitch: string
+  }
+  theme: {
+    light: string
+    dark: string
   }
   language: {
     fr: string

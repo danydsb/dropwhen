@@ -66,7 +66,6 @@ export const fr: UiMessages = {
   errors: {
     searchFailed: 'Erreur de recherche.',
     unexpected: 'Erreur inattendue.',
-    popupBlocked: 'Popup bloquée — autorisez les fenêtres pop-up pour ouvrir Google Agenda.',
   },
 
   warnings: {
@@ -75,7 +74,6 @@ export const fr: UiMessages = {
     rawgMissing:
       'Clé API RAWG manquante. Obtenez-en une sur rawg.io/apidocs ou gardez VITE_DEMO_MODE=true.',
     rawgUnavailable: (detail) => `RAWG indisponible (${detail}).`,
-    gamesCalendarOk: 'Calendrier des sorties jeux via RAWG.',
     gamesCalendarEmpty: 'Aucun jeu à venir sur les 6 prochains mois.',
     upcomingComicsEmpty: 'Aucune sortie BD/comics trouvée.',
     upcomingComicsOk: (sources) =>
@@ -101,6 +99,13 @@ export const fr: UiMessages = {
   a11y: {
     dismiss: 'Fermer',
     languageSwitch: 'Langue',
+    categorySwitch: 'Catégorie',
+    themeSwitch: 'Thème',
+  },
+
+  theme: {
+    light: 'Clair',
+    dark: 'Sombre',
   },
 
   language: {

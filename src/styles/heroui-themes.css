@@ -1,0 +1,85 @@
+/* Aperçus de thèmes HeroUI — variables sur le conteneur [data-theme] */
+
+html[data-theme='violet'],
+.theme-preview[data-theme='violet'] {
+  color-scheme: light;
+  --background: oklch(0.99 0.004 285);
+  --foreground: oklch(0.21 0.006 285);
+  --surface: oklch(1 0 0);
+  --accent: oklch(0.55 0.22 295);
+  --accent-foreground: oklch(0.99 0 0);
+  --muted: oklch(0.55 0.02 285);
+  --border: oklch(0.9 0.01 285);
+  --default: oklch(0.94 0.005 285);
+}
+
+html[data-theme='blue'],
+.theme-preview[data-theme='blue'] {
+  color-scheme: light;
+  --background: oklch(0.99 0.008 250);
+  --foreground: oklch(0.22 0.03 250);
+  --surface: oklch(1 0 0);
+  --accent: oklch(0.5 0.18 255);
+  --accent-foreground: oklch(0.99 0 0);
+  --muted: oklch(0.52 0.03 250);
+  --border: oklch(0.9 0.02 250);
+  --default: oklch(0.94 0.01 250);
+}
+
+html[data-theme='teal'],
+.theme-preview[data-theme='teal'] {
+  color-scheme: light;
+  --background: oklch(0.99 0.01 180);
+  --foreground: oklch(0.22 0.03 180);
+  --surface: oklch(1 0 0);
+  --accent: oklch(0.55 0.12 180);
+  --accent-foreground: oklch(0.99 0 0);
+  --muted: oklch(0.52 0.03 180);
+  --border: oklch(0.9 0.02 180);
+  --default: oklch(0.94 0.015 180);
+}
+
+html[data-theme='rose'],
+.theme-preview[data-theme='rose'] {
+  color-scheme: light;
+  --background: oklch(0.99 0.01 350);
+  --foreground: oklch(0.22 0.03 350);
+  --surface: oklch(1 0 0);
+  --accent: oklch(0.58 0.22 350);
+  --accent-foreground: oklch(0.99 0 0);
+  --muted: oklch(0.52 0.03 350);
+  --border: oklch(0.9 0.02 350);
+  --default: oklch(0.94 0.015 350);
+}
+
+html[data-theme='amber'],
+.theme-preview[data-theme='amber'] {
+  color-scheme: light;
+  --background: oklch(0.99 0.015 75);
+  --foreground: oklch(0.25 0.04 75);
+  --surface: oklch(1 0 0);
+  --accent: oklch(0.68 0.16 65);
+  --accent-foreground: oklch(0.2 0.04 65);
+  --muted: oklch(0.52 0.04 75);
+  --border: oklch(0.9 0.03 75);
+  --default: oklch(0.94 0.02 75);
+}
+
+html[data-theme='dark'],
+.theme-preview[data-theme='dark'] {
+  color-scheme: dark;
+  --background: oklch(0.17 0.02 285);
+  --foreground: oklch(0.95 0.01 285);
+  --surface: oklch(0.22 0.025 285);
+  --accent: oklch(0.68 0.18 295);
+  --accent-foreground: oklch(0.17 0.02 285);
+  --muted: oklch(0.65 0.02 285);
+  --border: oklch(0.32 0.02 285);
+  --default: oklch(0.28 0.02 285);
+}
+
+.tabs-equal {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+}
