@@ -87,7 +87,7 @@ function ThemePreviewPanel({ theme }: { theme: HeroUiThemeProposal }) {
                     BDfugue
                   </Chip>
                 </div>
-                <Button size="sm" variant="secondary">
+                <Button size="sm" variant="primary">
                   <CalendarPlus size={15} aria-hidden />
                   {ui.card.addToCalendar}
                 </Button>

@@ -95,7 +95,7 @@ export function ResultCard({
         </div>
 
         <Button
-          variant={isComics ? 'secondary' : 'primary'}
+          variant="primary"
           className="w-full shrink-0 sm:w-36"
           onPress={() => onAddToCalendar(item)}
         >
