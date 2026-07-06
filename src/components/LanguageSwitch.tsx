@@ -21,7 +21,7 @@ export function LanguageSwitch() {
             type="button"
             onClick={() => setLocale(code)}
             className={[
-              'rounded-full px-2.5 py-1 text-xs font-semibold uppercase transition',
+              'cursor-pointer rounded-full px-2.5 py-1 text-xs font-semibold uppercase transition',
               active
                 ? 'bg-white text-slate-900'
                 : 'text-slate-400 hover:text-white',

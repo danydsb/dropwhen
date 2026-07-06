@@ -18,8 +18,8 @@ export const en: UiMessages = {
   },
 
   gamesCalendar: {
-    title: 'Release calendar',
-    subtitle: 'Upcoming video games — next 6 months via RAWG',
+    title: 'Video games release calendar',
+    subtitle: 'Next 6 months via RAWG',
     emptyMonth: 'No releases scheduled this month.',
     count: (count) => `${count} game${count === 1 ? '' : 's'}`,
   },

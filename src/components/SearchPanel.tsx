@@ -45,7 +45,7 @@ export function SearchPanel({
                 type="button"
                 onClick={() => onCategoryChange(cat)}
                 className={[
-                  'flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-xs font-semibold transition-all sm:gap-2 sm:text-sm',
+                  'flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-xs font-semibold transition-all sm:gap-2 sm:text-sm',
                   isActive
                     ? 'text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200',

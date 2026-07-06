@@ -2,7 +2,7 @@ import { useTranslation } from './i18n'
 import { useCallback, useEffect, useState } from 'react'
 import { isDemoMode } from './config'
 import type { Category } from './types'
-import { AppHeader } from './components/AppHeader'
+import { LanguageSwitch } from './components/LanguageSwitch'
 import { HeroSection } from './components/HeroSection'
 import { SearchPanel } from './components/SearchPanel'
 import { ResultList } from './components/ResultList'
@@ -67,7 +67,9 @@ function App() {
         aria-hidden
       />
 
-      <AppHeader demoMode={demoMode} />
+      <div className="fixed right-4 top-4 z-50 sm:right-8">
+        <LanguageSwitch />
+      </div>
 
       <main className={`relative mx-auto ${CONTENT_MAX_WIDTH} space-y-8 px-4 py-8 sm:space-y-10 sm:px-8 sm:py-12 lg:space-y-12`}>
         <HeroSection />
