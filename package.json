@@ -12,8 +12,6 @@
   "dependencies": {
     "@heroui/react": "^3.2.1",
     "@heroui/styles": "^3.2.1",
-    "@tsparticles/react": "^4.3.1",
-    "@tsparticles/slim": "^4.3.1",
     "animejs": "^4.5.0",
     "lucide-react": "^1.23.0",
     "react": "^19.2.7",
