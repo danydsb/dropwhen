@@ -56,7 +56,7 @@ export function AnimatedDropWhenTitle() {
   return (
     <h1
       ref={rootRef}
-      className="font-display text-accent cursor-default overflow-visible text-4xl font-normal uppercase tracking-tight sm:text-5xl lg:text-6xl"
+      className="font-display text-accent mt-8 cursor-default overflow-visible text-4xl font-normal uppercase tracking-tight sm:mt-0 sm:text-5xl lg:text-6xl"
     >
       DropWhen
     </h1>
