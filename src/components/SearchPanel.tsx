@@ -1,3 +1,4 @@
+import { MIN_SEARCH_QUERY_LENGTH, isDemoMode } from '../config'
 import { useTranslation } from '../i18n'
 import { Button, Card, Input } from '@heroui/react'
 import { Loader2, Search } from 'lucide-react'
@@ -21,6 +22,9 @@ export function SearchPanel({
 }) {
   const { ui } = useTranslation()
   const categories: Category[] = ['games', 'comics']
+  const trimmedQuery = query.trim()
+  const isTooShort =
+    !isDemoMode() && trimmedQuery.length > 0 && trimmedQuery.length < MIN_SEARCH_QUERY_LENGTH
 
   return (
     <Card>
@@ -50,7 +54,11 @@ export function SearchPanel({
             className="min-w-0 flex-1"
             aria-label={ui.search.placeholder}
           />
-          <Button type="submit" isDisabled={loading} className="shrink-0 sm:min-w-[120px]">
+          <Button
+            type="submit"
+            isDisabled={loading || isTooShort}
+            className="shrink-0 sm:min-w-[120px]"
+          >
             {loading ? (
               <Loader2 size={16} className="animate-spin" aria-hidden />
             ) : (
@@ -60,7 +68,9 @@ export function SearchPanel({
           </Button>
         </form>
 
-        <p className="text-center text-xs text-muted">{ui.search.hint}</p>
+        <p className="text-center text-xs text-muted">
+          {isTooShort ? ui.search.minLengthHint(MIN_SEARCH_QUERY_LENGTH) : ui.search.hint}
+        </p>
       </Card.Content>
     </Card>
   )

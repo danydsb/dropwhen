@@ -1,6 +1,6 @@
 import { getUi } from '../i18n'
 import { useCallback, useRef, useState } from 'react'
-import { isDemoMode } from '../config'
+import { isDemoMode, MIN_SEARCH_QUERY_LENGTH } from '../config'
 import type { Category, ReleaseItem } from '../types'
 import { searchByCategory } from '../services/search'
 
@@ -33,6 +33,17 @@ export function useSearch() {
     if (!trimmed && !isDemoMode()) {
       setState({ ...initialState })
       lastParamsRef.current = null
+      return
+    }
+
+    if (!isDemoMode() && trimmed.length > 0 && trimmed.length < MIN_SEARCH_QUERY_LENGTH) {
+      setState({
+        items: [],
+        warning: getUi().warnings.queryTooShort(MIN_SEARCH_QUERY_LENGTH),
+        loading: false,
+        hasSearched: true,
+      })
+      lastParamsRef.current = { category, query: trimmed }
       return
     }
 

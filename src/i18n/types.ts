@@ -22,6 +22,7 @@ export type UiMessages = {
     placeholder: string
     submit: string
     hint: string
+    minLengthHint: (min: number) => string
   }
   empty: {
     noResults: string
@@ -35,6 +36,7 @@ export type UiMessages = {
     addToCalendar: string
     developer: string
     publisher: string
+    released: string
   }
   dates: {
     unknown: string
@@ -55,9 +57,10 @@ export type UiMessages = {
     rawgMissing: string
     rawgUnavailable: (detail: string) => string
     gamesCalendarEmpty: string
-    upcomingComicsEmpty: string
-    upcomingComicsOk: (sources: string[]) => string
+    comicsEmpty: string
+    comicsOk: (sources: string[]) => string
     upcomingComicsUnavailable: (detail: string) => string
+    queryTooShort: (min: number) => string
   }
   demo: {
     sourceRawg: string

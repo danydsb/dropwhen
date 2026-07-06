@@ -8,6 +8,7 @@ export interface ReleaseItem {
   releaseDate?: string
   releaseDateLabel?: string
   dateCertainty: DateCertainty
+  isReleased?: boolean
   platformOrPublisher?: string
   genres?: string[]
   developer?: string

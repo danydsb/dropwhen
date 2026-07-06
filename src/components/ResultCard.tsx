@@ -14,9 +14,10 @@ export function ResultCard({
 }) {
   const { ui } = useTranslation()
   const isComics = item.category === 'comics'
+  const isReleased = item.isReleased === true
 
   return (
-    <Card>
+    <Card className={isReleased ? 'border-success/40' : undefined}>
       <Card.Content className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-5">
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl sm:h-[72px] sm:w-[72px]">
           {item.imageUrl ? (
@@ -38,14 +39,23 @@ export function ResultCard({
         <div className="min-w-0 flex-1 space-y-1.5">
           <div className="flex flex-wrap items-start gap-2">
             <h3 className="line-clamp-2 text-base font-semibold sm:line-clamp-1">{item.title}</h3>
-            {item.dateCertainty !== 'confirmed' && (
+            {isReleased && (
+              <Chip size="sm" color="success" variant="soft">
+                {ui.card.released}
+              </Chip>
+            )}
+            {!isReleased && item.dateCertainty !== 'confirmed' && (
               <Chip size="sm" color="warning" variant="soft">
                 {getCertaintyLabel(item.dateCertainty)}
               </Chip>
             )}
           </div>
 
-          <p className="text-sm font-medium">{item.releaseDateLabel ?? ui.card.unknownDate}</p>
+          <p
+            className={`text-sm font-medium ${isReleased ? 'text-success' : ''}`}
+          >
+            {item.releaseDateLabel ?? ui.card.unknownDate}
+          </p>
 
           {item.platformOrPublisher && (
             <p className="text-xs text-muted">{item.platformOrPublisher}</p>

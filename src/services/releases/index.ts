@@ -6,6 +6,7 @@ export type {
 
 export {
   dedupeReleases,
+  fromOpenLibrary,
   fromUrbanComics,
   matchesRelease,
   toReleaseItem,

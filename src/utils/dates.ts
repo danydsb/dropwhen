@@ -48,6 +48,11 @@ export function isFutureOrToday(isoDate?: string): boolean {
   return target >= today
 }
 
+export function isPastRelease(isoDate?: string): boolean {
+  if (!isoDate) return false
+  return !isFutureOrToday(isoDate)
+}
+
 export function getCertaintyLabel(certainty: DateCertainty): string {
   return getUi().dates.certainty[certainty]
 }

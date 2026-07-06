@@ -97,6 +97,14 @@ export default defineConfig({
               expiration: { maxEntries: 30, maxAgeSeconds: 3600 },
             },
           },
+          {
+            urlPattern: /^https:\/\/openlibrary\.org\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'open-library-cache',
+              expiration: { maxEntries: 40, maxAgeSeconds: 3600 },
+            },
+          },
         ],
       },
     }),

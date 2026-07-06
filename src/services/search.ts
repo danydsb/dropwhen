@@ -1,4 +1,5 @@
-import { isDemoMode } from '../config'
+import { MIN_SEARCH_QUERY_LENGTH, isDemoMode } from '../config'
+import { getUi } from '../i18n'
 import type { Category, SearchResult } from '../types'
 import { searchDemo } from '../data/demo-results'
 import { searchComics } from './releases'
@@ -15,6 +16,9 @@ export async function searchByCategory(
 
   const trimmed = query.trim()
   if (!trimmed) return { items: [] }
+  if (trimmed.length < MIN_SEARCH_QUERY_LENGTH) {
+    return { items: [], warning: getUi().warnings.queryTooShort(MIN_SEARCH_QUERY_LENGTH) }
+  }
 
   switch (category) {
     case 'games':

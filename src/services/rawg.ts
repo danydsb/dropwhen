@@ -1,7 +1,7 @@
 import { getUi } from '../i18n'
 import type { ReleaseItem, SearchResult } from '../types'
 import { getUpcomingDateRange } from '../utils/calendar-months'
-import { formatDisplayDate, normalizeSearchTerm } from '../utils/dates'
+import { formatDisplayDate, isPastRelease, normalizeSearchTerm } from '../utils/dates'
 import { fetchJsonViaProxy, fetchWithCorsFallback } from './cors-proxy'
 
 interface RawgNamedEntity {
@@ -131,6 +131,7 @@ function mapRawgGame(game: RawgGame, detail?: RawgGameDetail | null): ReleaseIte
     releaseDate: game.released ?? undefined,
     releaseDateLabel: game.released ? formatDisplayDate(game.released) : ui.dates.tba,
     dateCertainty: game.tba || !game.released ? 'unknown' : 'confirmed',
+    isReleased: game.released ? isPastRelease(game.released) : undefined,
     platformOrPublisher: platforms || undefined,
     genres: genres?.length ? genres : undefined,
     developer: joinNames(detail?.developers),
@@ -160,6 +161,20 @@ async function fetchGameDetail(gameId: number, apiKey: string): Promise<RawgGame
   } catch {
     return null
   }
+}
+
+async function mapInBatches<T, R>(
+  items: T[],
+  mapper: (item: T, index: number) => Promise<R>,
+  batchSize = 4,
+): Promise<R[]> {
+  const results: R[] = []
+  for (let index = 0; index < items.length; index += batchSize) {
+    const batch = items.slice(index, index + batchSize)
+    const batchResults = await Promise.all(batch.map((item, offset) => mapper(item, index + offset)))
+    results.push(...batchResults)
+  }
+  return results
 }
 
 const UPCOMING_CACHE_TTL_MS = 60 * 60 * 1000
@@ -214,9 +229,7 @@ export async function searchGames(query: string): Promise<SearchResult> {
   try {
     const data = await fetchRawgJson<RawgSearchResponse>(searchUrl)
     const rankedResults = rankRawgGames(data.results, query)
-    const details = await Promise.all(
-      rankedResults.map((game) => fetchGameDetail(game.id, apiKey)),
-    )
+    const details = await mapInBatches(rankedResults, (game) => fetchGameDetail(game.id, apiKey))
     return { items: rankedResults.map((game, index) => mapRawgGame(game, details[index])) }
   } catch (error) {
     const detail = error instanceof Error ? error.message : 'unknown error'

@@ -28,6 +28,7 @@ export const en: UiMessages = {
     placeholder: 'Search for a release…',
     submit: 'Search',
     hint: 'Press Enter or click Search.',
+    minLengthHint: (min) => `Enter at least ${min} characters to search.`,
   },
 
   empty: {
@@ -43,6 +44,7 @@ export const en: UiMessages = {
     addToCalendar: 'Add',
     developer: 'Developer',
     publisher: 'Publisher',
+    released: 'Already released',
   },
 
   dates: {
@@ -74,10 +76,10 @@ export const en: UiMessages = {
       'RAWG API key missing. Get one at rawg.io/apidocs or keep VITE_DEMO_MODE=true.',
     rawgUnavailable: (detail) => `RAWG unavailable (${detail}).`,
     gamesCalendarEmpty: 'No upcoming games in the next 6 months.',
-    upcomingComicsEmpty: 'No BD/comics releases found.',
-    upcomingComicsOk: (sources) =>
-      `Upcoming releases via ${sources.join(', ')}.`,
+    comicsEmpty: 'No comics or graphic novels found.',
+    comicsOk: (sources) => `Results via ${sources.join(', ')}.`,
     upcomingComicsUnavailable: (detail) => `BD/comics sources unavailable (${detail}).`,
+    queryTooShort: (min) => `Search too short — enter at least ${min} characters.`,
   },
 
   demo: {
