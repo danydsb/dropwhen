@@ -5,6 +5,7 @@ import type { Category } from './types'
 import { LanguageSwitch } from './components/LanguageSwitch'
 import { ThemeSwitch } from './components/ThemeSwitch'
 import { RelaxBackground } from './components/RelaxBackground'
+import { ToastyEasterEgg } from './components/ToastyEasterEgg'
 import { HeroSection } from './components/HeroSection'
 import { SearchPanel } from './components/SearchPanel'
 import { ResultList } from './components/ResultList'
@@ -64,9 +65,13 @@ function App() {
   return (
     <div className="bg-background text-foreground relative min-h-dvh">
       <RelaxBackground />
+      <ToastyEasterEgg />
 
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2 sm:right-8">
+      <div className="fixed top-4 left-4 z-50 sm:left-8">
         <LanguageSwitch />
+      </div>
+
+      <div className="fixed top-4 right-4 z-50 sm:right-8">
         <ThemeSwitch />
       </div>
 
