@@ -50,10 +50,8 @@ function QToasty(params = {}) {
         }
     };
     
-    var soundDuration = 720; // 0.719433s
-    
     // up, up, down, down, left, right, left, right, b, a
-    var konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+    
     
     var soundEl = document.createElement('audio');
     soundEl.src = this.dataSound;
@@ -101,7 +99,7 @@ function QToasty(params = {}) {
         if (!easingFunctions.hasOwnProperty(easing)) easing = 'linear';
         
         var pName = prop.name;
-        var regex = /(\-|\+)?(=)?([^p]+)(px)?/g;
+        var regex = /(-|\+)?(=)?([^p]+)(px)?/g;
         var match = regex.exec(prop.value);
         var pValue = match[3];
         var pUnit = match[4] || '';

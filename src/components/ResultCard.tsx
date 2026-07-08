@@ -1,6 +1,7 @@
 import { useTranslation } from '../i18n'
 import { Button, Card, Chip } from '@heroui/react'
 import { CalendarPlus, ExternalLink } from 'lucide-react'
+import type { CSSProperties } from 'react'
 import type { ReleaseItem } from '../types'
 import { CategoryIcon } from './CategoryIcon'
 import { getCertaintyLabel } from '../utils/dates'
@@ -14,18 +15,49 @@ export function ResultCard({
 }) {
   const { ui } = useTranslation()
   const isComics = item.category === 'comics'
+  const isGames = item.category === 'games'
   const isReleased = item.isReleased === true
+
+  function getGameTypeStyle(typeId?: number): CSSProperties | undefined {
+    if (!typeId) return undefined
+
+    // Palette distincte par type IGDB (id game_type).
+    const palette: Record<number, { bg: string; fg: string }> = {
+      1: { bg: 'rgba(255, 77, 79, 0.15)', fg: '#ff4d4f' }, // DLC
+      2: { bg: 'rgba(255, 159, 67, 0.15)', fg: '#ff9f43' }, // Expansion
+      3: { bg: 'rgba(255, 199, 0, 0.16)', fg: '#ffc700' }, // Bundle
+      4: { bg: 'rgba(16, 185, 129, 0.15)', fg: '#10b981' }, // Standalone Expansion
+      5: { bg: 'rgba(34, 197, 94, 0.15)', fg: '#22c55e' }, // Mod
+      6: { bg: 'rgba(132, 204, 22, 0.16)', fg: '#84cc16' }, // Episode
+      7: { bg: 'rgba(34, 211, 238, 0.15)', fg: '#22d3ee' }, // Season
+      8: { bg: 'rgba(59, 130, 246, 0.15)', fg: '#3b82f6' }, // Remake
+      9: { bg: 'rgba(99, 102, 241, 0.15)', fg: '#6366f1' }, // Remaster
+      10: { bg: 'rgba(168, 85, 247, 0.15)', fg: '#a855f7' }, // Expanded Game
+      11: { bg: 'rgba(244, 63, 94, 0.15)', fg: '#f43f5e' }, // Port
+      12: { bg: 'rgba(148, 163, 184, 0.18)', fg: '#94a3b8' }, // Fork
+      13: { bg: 'rgba(245, 158, 11, 0.15)', fg: '#f59e0b' }, // Pack / Addon
+      14: { bg: 'rgba(124, 58, 237, 0.15)', fg: '#7c3aed' }, // Update
+    }
+
+    const entry = palette[typeId]
+    if (!entry) return undefined
+    return { backgroundColor: entry.bg, color: entry.fg }
+  }
 
   return (
     <Card className={isReleased ? 'border-success/40' : undefined}>
       <Card.Content className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-5">
-        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl sm:h-[72px] sm:w-[72px]">
+        <div
+          className={`relative shrink-0 overflow-hidden rounded-xl ${
+            isGames ? 'h-28 w-28 sm:h-36 sm:w-36' : 'h-16 w-16 sm:h-[72px] sm:w-[72px]'
+          }`}
+        >
           {item.imageUrl ? (
             <img
               src={item.imageUrl}
               alt={item.title}
               loading="lazy"
-              className="h-full w-full object-cover"
+              className={`h-full w-full ${isGames ? 'object-contain bg-transparent' : 'object-cover'}`}
             />
           ) : (
             <div
@@ -39,6 +71,11 @@ export function ResultCard({
         <div className="min-w-0 flex-1 space-y-1.5">
           <div className="flex flex-wrap items-start gap-2">
             <h3 className="line-clamp-2 text-base font-semibold sm:line-clamp-1">{item.title}</h3>
+            {item.gameTypeLabel && (
+              <Chip size="sm" variant="soft" style={getGameTypeStyle(item.gameTypeId)}>
+                {item.gameTypeLabel}
+              </Chip>
+            )}
             {isReleased && (
               <Chip size="sm" color="success" variant="soft">
                 {ui.card.released}

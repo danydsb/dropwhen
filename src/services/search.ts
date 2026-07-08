@@ -1,9 +1,9 @@
-import { MIN_SEARCH_QUERY_LENGTH, isDemoMode } from '../config'
+import { getMinSearchQueryLength, isDemoMode } from '../config'
 import { getUi } from '../i18n'
 import type { Category, SearchResult } from '../types'
 import { searchDemo } from '../data/demo-results'
 import { searchComics } from './releases'
-import { searchGames } from './rawg'
+import { searchGames } from './igdb'
 
 export async function searchByCategory(
   category: Category,
@@ -15,9 +15,10 @@ export async function searchByCategory(
   }
 
   const trimmed = query.trim()
+  const minLength = getMinSearchQueryLength(category)
   if (!trimmed) return { items: [] }
-  if (trimmed.length < MIN_SEARCH_QUERY_LENGTH) {
-    return { items: [], warning: getUi().warnings.queryTooShort(MIN_SEARCH_QUERY_LENGTH) }
+  if (trimmed.length < minLength) {
+    return { items: [], warning: getUi().warnings.queryTooShort(minLength) }
   }
 
   switch (category) {

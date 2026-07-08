@@ -14,7 +14,7 @@ function buildDemoItems(): ReleaseItem[] {
       dateCertainty: 'confirmed',
       platformOrPublisher: 'PS5, PC',
       source: ui.demo.sourceRawg,
-      sourceUrl: 'https://rawg.io',
+      sourceUrl: 'https://www.igdb.com',
       category: 'games',
     },
     {

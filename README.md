@@ -24,17 +24,17 @@ Aucun backend, aucune base de données : déployable en statique sur Vercel, Net
 
 ## Choix des sources de données
 
-### Jeux vidéo — RAWG (retenu)
+### Jeux vidéo — IGDB (via proxy serveur)
 
-| Critère | RAWG | IGDB |
+| Critère | IGDB (proxy serveur) | RAWG |
 |--------|------|------|
-| Auth | Clé API en query param | OAuth2 client credentials + **client secret** |
-| Navigateur | Possible avec clé `VITE_*` (exposée côté client) | **Bloqué** : pas de CORS, secret serveur obligatoire |
-| Données | Riche (plateformes, visuels, dates) | Très riche mais réservé au server-side |
+| Auth | OAuth2 client credentials + client secret (côté serveur) | Clé API en query param |
+| Navigateur | Appels via `/api/igdb-proxy` (pas de secret exposé) | Clé visible côté client |
+| Données | Très riche (plateformes, visuels, dates) | Riche |
 
-**Décision : RAWG** — seule option viable sans backend pour un site statique. La clé API reste visible dans le bundle (limitation acceptée pour un projet personnel ; quota RAWG ~20 000 req/mois).
+**Décision : IGDB** — intégré via un proxy serveur (`/api/igdb-proxy`) pour éviter l'exposition du secret Twitch et contourner les restrictions CORS.
 
-**CORS :** RAWG peut bloquer certaines requêtes cross-origin selon l’environnement. Le projet tente d’abord un fetch direct, puis bascule sur un **proxy CORS configurable** (`VITE_CORS_PROXY`, par défaut AllOrigins).
+**CORS :** IGDB ne permet pas les appels navigateur directs. Tous les appels jeux passent par le proxy serveur local/Vercel.
 
 ### Manga — AniList + Nautiljon
 
@@ -60,10 +60,10 @@ Pas de flux RSS public officiel (newsletters e-mail uniquement). Les données so
 
 | Limite | Détail |
 |--------|--------|
-| **CORS** | RAWG, Nautiljon (RSSHub), BDfugue nécessitent souvent un proxy public (AllOrigins). Fiabilité variable, rate limits, risque de blocage. |
+| **CORS** | IGDB passe par un proxy serveur dédié ; Nautiljon (RSSHub) et BDfugue peuvent encore nécessiter un proxy selon la source. |
 | **Dates manga** | AniList = dates JP ; Nautiljon = dates FR volumes (couverture partielle du catalogue). |
 | **Scraping BDfugue** | Structure HTML susceptible de changer ; parsing best-effort. |
-| **Clés API exposées** | `VITE_RAWG_API_KEY` et `VITE_GOOGLE_CLIENT_ID` sont incluses dans le bundle client. |
+| **Secrets** | `IGDB_CLIENT_SECRET` doit rester côté serveur. `VITE_GOOGLE_CLIENT_ID` reste côté client (normal pour OAuth public). |
 | **Proxy public** | Non recommandé en production critique ; préférez votre propre proxy (Cloudflare Worker, etc.). |
 
 ---
@@ -78,7 +78,8 @@ cp .env.example .env.local
 
 | Variable | Obligatoire | Description |
 |----------|-------------|-------------|
-| `VITE_RAWG_API_KEY` | Oui (jeux) | Clé API [RAWG](https://rawg.io/apidocs) |
+| `IGDB_CLIENT_ID` | Oui (jeux) | Client ID Twitch/IGDB (serveur) |
+| `IGDB_CLIENT_SECRET` | Oui (jeux) | Client secret Twitch/IGDB (serveur) |
 | `VITE_GOOGLE_CLIENT_ID` | Oui (agenda) | Client ID OAuth Google (type « Application Web ») |
 | `VITE_CORS_PROXY` | Non | Préfixe proxy CORS (défaut : `https://api.allorigins.win/raw?url=`) |
 | `VITE_RSSHUB_BASE` | Non | Instance RSSHub (défaut : `https://rsshub.app`) |
@@ -141,7 +142,8 @@ git push -u origin main
 
 Dans **Settings → Environment Variables**, ajouter :
 
-- `VITE_RAWG_API_KEY`
+- `IGDB_CLIENT_ID`
+- `IGDB_CLIENT_SECRET`
 - `VITE_GOOGLE_CLIENT_ID`
 - (optionnel) `VITE_CORS_PROXY`, `VITE_RSSHUB_BASE`
 

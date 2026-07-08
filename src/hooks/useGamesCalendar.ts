@@ -1,6 +1,6 @@
 import { getUi } from '../i18n'
 import { useCallback, useEffect, useState } from 'react'
-import { fetchUpcomingGames } from '../services/rawg'
+import { fetchUpcomingGames } from '../services/igdb'
 import type { ReleaseItem } from '../types'
 import {
   buildUpcomingMonths,

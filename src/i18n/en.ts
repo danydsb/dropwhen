@@ -19,7 +19,7 @@ export const en: UiMessages = {
 
   gamesCalendar: {
     title: 'Video games release calendar',
-    subtitle: 'Next 6 months via RAWG',
+    subtitle: 'Next 6 months via IGDB',
     emptyMonth: 'No releases scheduled this month.',
     count: (count) => `${count} game${count === 1 ? '' : 's'}`,
   },
@@ -73,8 +73,8 @@ export const en: UiMessages = {
     demo:
       'Demo mode is on — mock data only. Set VITE_DEMO_MODE=false in .env.local to enable live sources.',
     rawgMissing:
-      'RAWG API key missing. Get one at rawg.io/apidocs or keep VITE_DEMO_MODE=true.',
-    rawgUnavailable: (detail) => `RAWG unavailable (${detail}).`,
+      'IGDB configuration missing. Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET on the server.',
+    rawgUnavailable: (detail) => `IGDB unavailable (${detail}).`,
     gamesCalendarEmpty: 'No upcoming games in the next 6 months.',
     comicsEmpty: 'No comics or graphic novels found.',
     comicsOk: (sources) => `Results via ${sources.join(', ')}.`,
@@ -83,7 +83,7 @@ export const en: UiMessages = {
   },
 
   demo: {
-    sourceRawg: 'RAWG (demo)',
+    sourceRawg: 'IGDB (demo)',
     sourceUrbanComics: 'Urban Comics (demo)',
     multiPlatform: 'Multi-platform',
   },

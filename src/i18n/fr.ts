@@ -19,7 +19,7 @@ export const fr: UiMessages = {
 
   gamesCalendar: {
     title: 'Calendrier des sorties Jeux vidéo',
-    subtitle: '6 prochains mois via RAWG',
+    subtitle: '6 prochains mois via IGDB',
     emptyMonth: 'Aucune sortie prévue ce mois-ci.',
     count: (count) => `${count} jeu${count > 1 ? 'x' : ''}`,
   },
@@ -74,8 +74,8 @@ export const fr: UiMessages = {
     demo:
       'Mode démo actif — données fictives, aucun appel API. Définissez VITE_DEMO_MODE=false dans .env.local pour activer les vraies sources.',
     rawgMissing:
-      'Clé API RAWG manquante. Obtenez-en une sur rawg.io/apidocs ou gardez VITE_DEMO_MODE=true.',
-    rawgUnavailable: (detail) => `RAWG indisponible (${detail}).`,
+      'Configuration IGDB manquante. Définissez IGDB_CLIENT_ID et IGDB_CLIENT_SECRET côté serveur.',
+    rawgUnavailable: (detail) => `IGDB indisponible (${detail}).`,
     gamesCalendarEmpty: 'Aucun jeu à venir sur les 6 prochains mois.',
     comicsEmpty: 'Aucune BD/comics trouvée.',
     comicsOk: (sources) => `Résultats via ${sources.join(', ')}.`,
@@ -84,7 +84,7 @@ export const fr: UiMessages = {
   },
 
   demo: {
-    sourceRawg: 'RAWG (démo)',
+    sourceRawg: 'IGDB (démo)',
     sourceUrbanComics: 'Urban Comics (démo)',
     multiPlatform: 'Multi-plateformes',
   },

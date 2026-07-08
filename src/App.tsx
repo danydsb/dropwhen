@@ -1,6 +1,6 @@
 import { useTranslation } from './i18n'
 import { useCallback, useEffect, useState } from 'react'
-import { isDemoMode } from './config'
+import { getMinSearchQueryLength, isDemoMode } from './config'
 import type { Category } from './types'
 import { LanguageSwitch } from './components/LanguageSwitch'
 import { ThemeSwitch } from './components/ThemeSwitch'
@@ -33,10 +33,6 @@ function App() {
     reload: reloadCalendar,
   } = useGamesCalendar(showGamesCalendar)
 
-  const handleSearch = useCallback(() => {
-    void search(category, query)
-  }, [category, query, search])
-
   const handleCategoryChange = useCallback(
     (next: Category) => {
       setCategory(next)
@@ -49,6 +45,25 @@ function App() {
   useEffect(() => {
     if (demoMode) void search('games', '')
   }, [demoMode, search])
+
+  useEffect(() => {
+    if (demoMode) return
+
+    const trimmed = query.trim()
+    if (!trimmed) {
+      clear()
+      return
+    }
+
+    const minLength = getMinSearchQueryLength(category)
+    if (trimmed.length < minLength) return
+
+    const timeout = window.setTimeout(() => {
+      void search(category, trimmed)
+    }, 550)
+
+    return () => window.clearTimeout(timeout)
+  }, [category, clear, demoMode, query, search])
 
   useEffect(() => {
     const last = getLastParams()
@@ -81,10 +96,8 @@ function App() {
         <SearchPanel
           category={category}
           query={query}
-          loading={loading}
           onCategoryChange={handleCategoryChange}
           onQueryChange={setQuery}
-          onSubmit={handleSearch}
         />
 
         <div className="space-y-3">
