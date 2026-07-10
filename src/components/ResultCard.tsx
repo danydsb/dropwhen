@@ -141,14 +141,16 @@ export function ResultCard({
           </div>
         </div>
 
-        <Button
-          variant="primary"
-          className="w-full shrink-0 sm:w-36"
-          onPress={() => onAddToCalendar(item)}
-        >
-          <CalendarPlus size={15} aria-hidden />
-          <span className="truncate">{ui.card.addToCalendar}</span>
-        </Button>
+        {!isReleased && (
+          <Button
+            variant="primary"
+            className="w-full shrink-0 sm:w-36"
+            onPress={() => onAddToCalendar(item)}
+          >
+            <CalendarPlus size={15} aria-hidden />
+            <span className="truncate">{ui.card.addToCalendar}</span>
+          </Button>
+        )}
       </Card.Content>
     </Card>
   )
