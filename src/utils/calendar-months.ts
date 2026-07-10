@@ -1,6 +1,6 @@
 import { getIntlLocale, getLocale } from '../i18n'
 import type { ReleaseItem } from '../types'
-import { isFutureOrToday } from './dates'
+import { isFutureOrToday, isToday } from './dates'
 
 export const UPCOMING_MONTH_COUNT = 6
 
@@ -47,13 +47,21 @@ export function getUpcomingDateRange(monthCount = UPCOMING_MONTH_COUNT): {
 export function groupReleaseItemsByMonth(
   items: ReleaseItem[],
   months: MonthSection[],
-): Array<{ month: MonthSection; items: ReleaseItem[] }> {
-  const upcoming = items.filter((item) => isFutureOrToday(item.releaseDate))
+): { todayItems: ReleaseItem[]; sections: Array<{ month: MonthSection; items: ReleaseItem[] }> } {
+  const todayItems = items
+    .filter((item) => isToday(item.releaseDate))
+    .sort((a, b) => a.title.localeCompare(b.title))
 
-  return months.map((month) => ({
+  const upcoming = items.filter(
+    (item) => isFutureOrToday(item.releaseDate) && !isToday(item.releaseDate),
+  )
+
+  const sections = months.map((month) => ({
     month,
     items: upcoming
       .filter((item) => item.releaseDate?.startsWith(month.key))
       .sort((a, b) => (a.releaseDate ?? '').localeCompare(b.releaseDate ?? '')),
   }))
+
+  return { todayItems, sections }
 }

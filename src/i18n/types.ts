@@ -15,6 +15,10 @@ export type UiMessages = {
   gamesCalendar: {
     title: string
     subtitle: string
+    todayTitle: string
+    todaySubtitle: string
+    upcomingLabel: string
+    emptyToday: string
     emptyMonth: string
     count: (count: number) => string
   }
@@ -33,6 +37,9 @@ export type UiMessages = {
   card: {
     unknownDate: string
     viewSource: string
+    enlargeCover: string
+    copyLink: string
+    linkCopied: string
     addToCalendar: string
     developer: string
     publisher: string

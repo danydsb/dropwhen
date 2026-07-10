@@ -3,6 +3,7 @@ import { Card } from '@heroui/react'
 import { CalendarSearch, SearchX, Sparkles } from 'lucide-react'
 import type { ReleaseItem } from '../types'
 import { ResultCard } from './ResultCard'
+import { ResultCardSkeleton } from './ResultCardSkeleton'
 
 export function ResultList({
   items,
@@ -23,16 +24,7 @@ export function ResultList({
     return (
       <div className="space-y-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i}>
-            <Card.Content className="flex animate-pulse gap-4 p-5">
-              <div className="bg-default size-16 shrink-0 rounded-xl sm:size-[72px]" />
-              <div className="flex-1 space-y-2">
-                <div className="bg-default h-4 w-2/3 rounded" />
-                <div className="bg-default h-3 w-1/3 rounded" />
-                <div className="bg-default h-9 w-36 rounded-xl" />
-              </div>
-            </Card.Content>
-          </Card>
+          <ResultCardSkeleton key={i} />
         ))}
       </div>
     )

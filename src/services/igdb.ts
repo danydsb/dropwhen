@@ -81,21 +81,6 @@ function getArtworkUrl(artworks?: IgdbArtwork[]): string | undefined {
   return artwork.url
 }
 
-function getAspectRatio(game: IgdbGame): number | undefined {
-  if (game.cover?.width && game.cover?.height) {
-    const ratio = game.cover.width / game.cover.height
-    if (Number.isFinite(ratio) && ratio > 0) return ratio
-  }
-
-  const artworkWithDimensions = game.artworks?.find((a) => a.width && a.height)
-  if (artworkWithDimensions?.width && artworkWithDimensions?.height) {
-    const ratio = artworkWithDimensions.width / artworkWithDimensions.height
-    if (Number.isFinite(ratio) && ratio > 0) return ratio
-  }
-
-  return undefined
-}
-
 function toIsoDate(timestampSeconds?: number): string | undefined {
   if (!timestampSeconds) return undefined
   const date = new Date(timestampSeconds * 1000)
@@ -199,7 +184,6 @@ function getGameTypeId(game: IgdbGame): number | undefined {
 function mapIgdbGame(game: IgdbGame): ReleaseItem {
   const ui = getUi()
   const releaseDate = toIsoDate(game.first_release_date)
-  const imageAspectRatio = getAspectRatio(game)
 
   const developerNames =
     game.involved_companies
@@ -223,7 +207,6 @@ function mapIgdbGame(game: IgdbGame): ReleaseItem {
     developer: joinNames(developerNames),
     publisher: joinNames(publisherNames),
     imageUrl: getImageUrl(game.cover) ?? getArtworkUrl(game.artworks),
-    imageAspectRatio,
     gameTypeLabel: getGameTypeLabel(game),
     gameTypeId: getGameTypeId(game),
     source: 'IGDB',

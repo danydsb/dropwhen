@@ -9,6 +9,7 @@ import {
 } from '../utils/calendar-months'
 
 interface GamesCalendarState {
+  todayItems: ReleaseItem[]
   sections: Array<{ month: MonthSection; items: ReleaseItem[] }>
   loading: boolean
   warning?: string
@@ -16,6 +17,7 @@ interface GamesCalendarState {
 }
 
 const emptyState: GamesCalendarState = {
+  todayItems: [],
   sections: [],
   loading: false,
 }
@@ -33,9 +35,11 @@ export function useGamesCalendar(enabled: boolean) {
     try {
       const result = await fetchUpcomingGames()
       const months = buildUpcomingMonths()
+      const { todayItems, sections } = groupReleaseItemsByMonth(result.items, months)
 
       setState({
-        sections: groupReleaseItemsByMonth(result.items, months),
+        todayItems,
+        sections,
         loading: false,
         warning: result.warning,
       })
@@ -44,6 +48,7 @@ export function useGamesCalendar(enabled: boolean) {
         sections: prev.sections.length > 0
           ? prev.sections
           : buildUpcomingMonths().map((month) => ({ month, items: [] })),
+        todayItems: prev.todayItems,
         loading: false,
         error: getUi().errors.searchFailed,
       }))

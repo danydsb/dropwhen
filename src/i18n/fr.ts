@@ -20,6 +20,10 @@ export const fr: UiMessages = {
   gamesCalendar: {
     title: 'Calendrier des sorties Jeux vidéo',
     subtitle: '6 prochains mois via IGDB',
+    todayTitle: 'Sorties du jour',
+    todaySubtitle: 'Les jeux qui sortent aujourd’hui',
+    upcomingLabel: 'À venir',
+    emptyToday: 'Aucune sortie prévue aujourd’hui.',
     emptyMonth: 'Aucune sortie prévue ce mois-ci.',
     count: (count) => `${count} jeu${count > 1 ? 'x' : ''}`,
   },
@@ -42,6 +46,9 @@ export const fr: UiMessages = {
   card: {
     unknownDate: 'Date inconnue',
     viewSource: 'Fiche',
+    enlargeCover: 'Agrandir la cover',
+    copyLink: 'Copier le lien',
+    linkCopied: 'Lien copié !',
     addToCalendar: 'Ajouter',
     developer: 'Développeur',
     publisher: 'Éditeur',

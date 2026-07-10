@@ -14,14 +14,9 @@ export interface ReleaseItem {
   developer?: string
   publisher?: string
   imageUrl?: string
-  /**
-   * Ratio image (width / height) pour préserver l'aspect en UI.
-   * Ex: 264/374 ~= 0.71.
-   */
-  imageAspectRatio?: number
-  /** Type IGDB (ex. DLC, Pack / Addon) — absent pour un jeu principal */
+  /** IGDB type label (e.g. DLC, Pack / Addon) — omitted for main games */
   gameTypeLabel?: string
-  /** ID IGDB (game_type.id) pour permettre un rendu couleur par type */
+  /** IGDB game_type.id for per-type color styling */
   gameTypeId?: number
   source: string
   sourceUrl?: string

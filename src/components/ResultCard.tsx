@@ -4,7 +4,10 @@ import { CalendarPlus, ExternalLink } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import type { ReleaseItem } from '../types'
 import { CategoryIcon } from './CategoryIcon'
-import { getCertaintyLabel } from '../utils/dates'
+import { CopyLinkButton } from './CopyLinkButton'
+import { CoverLightbox } from './CoverLightbox'
+import { TruncatedTitle } from './TruncatedTitle'
+import { getCertaintyLabel, isFromTomorrowOrLater } from '../utils/dates'
 
 export function ResultCard({
   item,
@@ -17,11 +20,12 @@ export function ResultCard({
   const isComics = item.category === 'comics'
   const isGames = item.category === 'games'
   const isReleased = item.isReleased === true
+  const canAddToCalendar = isFromTomorrowOrLater(item.releaseDate)
 
   function getGameTypeStyle(typeId?: number): CSSProperties | undefined {
     if (!typeId) return undefined
 
-    // Palette distincte par type IGDB (id game_type).
+    // Distinct palette per IGDB game_type id.
     const palette: Record<number, { bg: string; fg: string }> = {
       1: { bg: 'rgba(255, 77, 79, 0.15)', fg: '#ff4d4f' }, // DLC
       2: { bg: 'rgba(255, 159, 67, 0.15)', fg: '#ff9f43' }, // Expansion
@@ -47,17 +51,12 @@ export function ResultCard({
   return (
     <Card className={isReleased ? 'border-success/40' : undefined}>
       <Card.Content className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-5">
-        <div
-          className={`relative shrink-0 overflow-hidden rounded-xl ${
-            isGames ? 'h-28 w-28 sm:h-36 sm:w-36' : 'h-16 w-16 sm:h-[72px] sm:w-[72px]'
-          }`}
-        >
+        <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl sm:h-36 sm:w-36">
           {item.imageUrl ? (
-            <img
-              src={item.imageUrl}
-              alt={item.title}
-              loading="lazy"
-              className={`h-full w-full ${isGames ? 'object-contain bg-transparent' : 'object-cover'}`}
+            <CoverLightbox
+              imageUrl={item.imageUrl}
+              title={item.title}
+              objectFit={isGames ? 'object-contain' : 'object-cover'}
             />
           ) : (
             <div
@@ -69,8 +68,8 @@ export function ResultCard({
         </div>
 
         <div className="min-w-0 flex-1 space-y-1.5">
-          <div className="flex flex-wrap items-start gap-2">
-            <h3 className="line-clamp-2 text-base font-semibold sm:line-clamp-1">{item.title}</h3>
+          <div className="flex min-w-0 flex-wrap items-start gap-2">
+            <TruncatedTitle title={item.title} />
             {item.gameTypeLabel && (
               <Chip size="sm" variant="soft" style={getGameTypeStyle(item.gameTypeId)}>
                 {item.gameTypeLabel}
@@ -128,20 +127,23 @@ export function ResultCard({
               {item.source}
             </Chip>
             {item.sourceUrl && (
-              <a
-                href={item.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted hover:text-foreground inline-flex items-center gap-1 text-xs"
-              >
-                {ui.card.viewSource}
-                <ExternalLink size={11} aria-hidden />
-              </a>
+              <>
+                <a
+                  href={item.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted hover:text-foreground inline-flex items-center gap-1 text-xs"
+                >
+                  {ui.card.viewSource}
+                  <ExternalLink size={11} aria-hidden />
+                </a>
+                <CopyLinkButton url={item.sourceUrl} />
+              </>
             )}
           </div>
         </div>
 
-        {!isReleased && (
+        {canAddToCalendar && (
           <Button
             variant="primary"
             className="w-full shrink-0 sm:w-36"

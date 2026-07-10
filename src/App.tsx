@@ -26,6 +26,7 @@ function App() {
 
   const showGamesCalendar = category === 'games' && !hasSearched && !demoMode
   const {
+    todayItems: calendarTodayItems,
     sections: calendarSections,
     loading: calendarLoading,
     warning: calendarWarning,
@@ -108,6 +109,7 @@ function App() {
 
         {showGamesCalendar ? (
           <GamesCalendar
+            todayItems={calendarTodayItems}
             sections={calendarSections}
             loading={calendarLoading}
             onAddToCalendar={addEvent}

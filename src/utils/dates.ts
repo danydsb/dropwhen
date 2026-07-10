@@ -48,6 +48,28 @@ export function isFutureOrToday(isoDate?: string): boolean {
   return target >= today
 }
 
+export function getTodayIso(): string {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+}
+
+export function isToday(isoDate?: string): boolean {
+  if (!isoDate) return false
+  return isoDate === getTodayIso()
+}
+
+export function isFromTomorrowOrLater(isoDate?: string): boolean {
+  if (!isoDate) return false
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const target = new Date(isoDate)
+  target.setHours(0, 0, 0, 0)
+  return target >= tomorrow
+}
+
 export function isPastRelease(isoDate?: string): boolean {
   if (!isoDate) return false
   return !isFutureOrToday(isoDate)

@@ -62,7 +62,7 @@ export function buildGoogleCalendarUrl(item: ReleaseItem): string {
   return `${CALENDAR_BASE}?${params.toString()}`
 }
 
-/** Ouvre Google Agenda sans faux positif « popup bloquée » (noopener fait retourner null à window.open). */
+/** Opens Google Calendar without a false "popup blocked" signal (noopener makes window.open return null). */
 export function openGoogleCalendar(item: ReleaseItem): void {
   const link = document.createElement('a')
   link.href = buildGoogleCalendarUrl(item)
