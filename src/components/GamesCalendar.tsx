@@ -1,6 +1,6 @@
 import { useTranslation } from "../i18n";
 import { Card, Chip } from "@heroui/react";
-import { CalendarDays, Rocket } from "lucide-react";
+import { CalendarDays, ClockArrowDown } from "lucide-react";
 import { UPCOMING_MONTH_COUNT } from "../utils/calendar-months";
 import type { ReleaseItem } from "../types";
 import { formatDisplayDate, getTodayIso } from "../utils/dates";
@@ -60,7 +60,7 @@ function TodaySection({
 
       <header className="relative mb-4 flex items-start gap-3 sm:mb-5 sm:gap-4">
         <div className="bg-accent/25 ring-accent/40 flex size-12 shrink-0 items-center justify-center rounded-2xl ring-2 sm:size-14">
-          <Rocket size={24} className="text-accent" aria-hidden />
+          <ClockArrowDown size={24} className="text-accent" aria-hidden />
         </div>
 
         <div className="min-w-0 space-y-1">
