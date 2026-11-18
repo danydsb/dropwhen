@@ -1,201 +1,173 @@
-import { useTranslation } from "../i18n";
-import { Card, Chip } from "@heroui/react";
-import { CalendarDays, ClockArrowDown } from "lucide-react";
-import { UPCOMING_MONTH_COUNT } from "../utils/calendar-months";
-import type { ReleaseItem } from "../types";
-import { formatDisplayDate, getTodayIso } from "../utils/dates";
-import { ResultCard } from "./ResultCard";
-import { ResultCardSkeleton } from "./ResultCardSkeleton";
+import { useTranslation } from '../i18n'
+import type { ReleaseItem } from '../types'
+import { UPCOMING_MONTH_COUNT } from '../utils/calendar-months'
+import { daysUntil, formatDisplayDate, getTodayIso } from '../utils/dates'
+import { ReleaseCard, ReleaseCardSkeleton, ReleaseGrid } from './ReleaseCard'
 
-function MonthSkeleton() {
+function SectionHeading({ title, count }: { title: string; count?: string }) {
   return (
-    <div className="space-y-3">
-      <div className="bg-default h-6 w-40 animate-pulse rounded-lg" />
-      {Array.from({ length: 2 }).map((_, index) => (
-        <ResultCardSkeleton key={index} showButton={false} />
-      ))}
+    <div className="mt-14 mb-5 flex items-center gap-3.5">
+      <h3 className="font-anton text-[34px] leading-none uppercase sm:text-[46px]">{title}</h3>
+      {count && (
+        <span className="bg-[var(--mag-ink)] px-2.5 py-1 text-[13px] font-extrabold whitespace-nowrap text-[var(--mag-yellow)]">
+          {count}
+        </span>
+      )}
+      <hr className="flex-1 border-0 border-t-3 border-[var(--mag-ink)]" />
     </div>
-  );
+  )
 }
 
-function TodaySkeleton() {
-  return (
-    <div className="border-accent/50 from-accent/15 via-accent/8 relative space-y-4 overflow-hidden rounded-2xl border-2 bg-linear-to-br to-transparent p-5 sm:p-6">
-      <div
-        className="bg-accent/20 pointer-events-none absolute -top-10 -right-10 size-36 rounded-full blur-3xl"
-        aria-hidden
-      />
-      <div className="relative flex items-start gap-3">
-        <div className="bg-default size-11 shrink-0 animate-pulse rounded-xl" />
-        <div className="space-y-2">
-          <div className="bg-default h-7 w-48 animate-pulse rounded-lg" />
-          <div className="bg-default h-4 w-36 animate-pulse rounded" />
-        </div>
-      </div>
-      <ResultCardSkeleton showButton={false} />
-    </div>
-  );
+function pickHeadliner(items: ReleaseItem[]): ReleaseItem | undefined {
+  return items
+    .filter((item) => item.dateCertainty === 'confirmed' && (daysUntil(item.releaseDate) ?? -1) >= 0)
+    .sort((a, b) => (b.hypes ?? 0) - (a.hypes ?? 0))[0]
 }
 
-function TodaySection({
-  items,
+function Headliner({
+  item,
+  onOpen,
   onAddToCalendar,
 }: {
-  items: ReleaseItem[];
-  onAddToCalendar: (item: ReleaseItem) => void;
+  item: ReleaseItem
+  onOpen: (item: ReleaseItem) => void
+  onAddToCalendar: (item: ReleaseItem) => void
 }) {
-  const { ui } = useTranslation();
-  const todayLabel = formatDisplayDate(getTodayIso());
+  const { ui } = useTranslation()
+  const days = daysUntil(item.releaseDate) ?? 0
+  const background = item.artworkUrl ?? item.images?.[0] ?? item.imageUrl
 
   return (
-    <div className="border-accent/55 from-accent/18 via-accent/10 shadow-accent/20 relative overflow-hidden rounded-2xl border-2 bg-linear-to-br to-transparent p-5 shadow-lg sm:p-6">
-      <div
-        className="bg-accent/25 pointer-events-none absolute -top-14 -right-14 size-48 rounded-full blur-3xl"
-        aria-hidden
+    <div className="relative mt-6 grid overflow-hidden border-3 border-[var(--mag-ink)] bg-[var(--mag-blue)] text-white shadow-[8px_8px_0_var(--mag-ink)] md:grid-cols-2">
+      <button
+        type="button"
+        onClick={() => onOpen(item)}
+        aria-label={ui.mag.openDetails(item.title)}
+        className="min-h-[220px] cursor-pointer border-b-3 border-[var(--mag-ink)] bg-cover bg-center md:min-h-[340px] md:border-r-3 md:border-b-0"
+        style={{ backgroundImage: background ? `url(${background})` : undefined }}
       />
-      <div
-        className="bg-accent/10 pointer-events-none absolute -bottom-10 -left-10 size-32 rounded-full blur-2xl"
-        aria-hidden
-      />
-
-      <header className="relative mb-4 flex items-start gap-3 sm:mb-5 sm:gap-4">
-        <div className="bg-accent/25 ring-accent/40 flex size-12 shrink-0 items-center justify-center rounded-2xl ring-2 sm:size-14">
-          <ClockArrowDown size={24} className="text-accent" aria-hidden />
+      <div className="font-anton absolute top-4 left-4 grid size-24 -rotate-12 place-items-center rounded-full border-3 border-[var(--mag-ink)] bg-[var(--mag-pink)] text-center text-3xl leading-[0.9] text-white">
+        <div>
+          {ui.mag.countdown(days)}
+          <small className="block font-sans text-[10px] font-extrabold uppercase">
+            {ui.mag.countdownUnit(days)}
+          </small>
         </div>
-
-        <div className="min-w-0 space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-accent text-lg font-semibold sm:text-xl">
-              {ui.gamesCalendar.todayTitle}
-            </h3>
-            {items.length > 0 && (
-              <Chip size="sm" color="accent" variant="soft">
-                {ui.gamesCalendar.count(items.length)}
-              </Chip>
-            )}
-          </div>
-          <p className="text-foreground text-sm font-semibold sm:text-base">
-            {todayLabel}
-          </p>
-          <p className="text-muted text-xs sm:text-sm">
-            {ui.gamesCalendar.todaySubtitle}
-          </p>
+      </div>
+      <div className="p-6 sm:p-7">
+        <span className="inline-block border-2 border-[var(--mag-ink)] bg-[var(--mag-yellow)] px-2 py-0.5 text-xs font-extrabold text-[var(--mag-ink)] uppercase">
+          {ui.mag.mostAnticipated}
+        </span>
+        <h2 className="font-anton my-3.5 text-[44px] leading-[0.9] uppercase sm:text-[64px] lg:text-[78px]">
+          {item.title}
+        </h2>
+        <span className="font-marker inline-block -rotate-3 text-2xl text-[var(--mag-yellow)]">
+          {item.releaseDateLabel} !
+        </span>
+        <p className="mt-3.5 max-w-[40ch] opacity-90">
+          {[item.developer, item.platformOrPublisher].filter(Boolean).join(' · ')}
+          {item.hypes ? (
+            <>
+              <br />
+              {ui.mag.followers(item.hypes)}
+            </>
+          ) : null}
+        </p>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => onAddToCalendar(item)}
+            className="mag-press bg-[var(--mag-yellow)] px-4 py-2.5 text-sm font-extrabold text-[var(--mag-ink)] uppercase"
+          >
+            {ui.mag.addToCalendar} →
+          </button>
+          <button
+            type="button"
+            onClick={() => onOpen(item)}
+            className="mag-press bg-white px-4 py-2.5 text-sm font-extrabold text-[var(--mag-ink)] uppercase"
+          >
+            {ui.card.viewSource}
+          </button>
         </div>
-      </header>
-
-      {items.length === 0 ? (
-        <Card className="relative border-dashed border-accent/30 bg-background/70 text-center">
-          <Card.Content className="px-4 py-6">
-            <p className="text-muted text-sm">{ui.gamesCalendar.emptyToday}</p>
-          </Card.Content>
-        </Card>
-      ) : (
-        <div className="relative space-y-3">
-          {items.map((item) => (
-            <ResultCard
-              key={item.id}
-              item={item}
-              onAddToCalendar={onAddToCalendar}
-            />
-          ))}
-        </div>
-      )}
+      </div>
     </div>
-  );
+  )
 }
 
 export function GamesCalendar({
   todayItems,
   sections,
   loading,
+  onOpen,
   onAddToCalendar,
 }: {
-  todayItems: ReleaseItem[];
-  sections: Array<{
-    month: { key: string; label: string };
-    items: ReleaseItem[];
-  }>;
-  loading: boolean;
-  onAddToCalendar: (item: ReleaseItem) => void;
+  todayItems: ReleaseItem[]
+  sections: Array<{ month: { key: string; label: string }; items: ReleaseItem[] }>
+  loading: boolean
+  onOpen: (item: ReleaseItem) => void
+  onAddToCalendar: (item: ReleaseItem) => void
 }) {
-  const { ui } = useTranslation();
+  const { ui } = useTranslation()
 
   if (loading) {
     return (
-      <div className="space-y-8">
-        <TodaySkeleton />
-        <div className="border-border/60 flex items-center gap-3" aria-hidden>
-          <span className="bg-border h-px flex-1" />
-          <span className="bg-default h-3 w-16 animate-pulse rounded" />
-          <span className="bg-border h-px flex-1" />
-        </div>
-        <div className="space-y-1">
-          <div className="bg-default h-6 w-48 animate-pulse rounded-lg" />
-          <div className="bg-default h-4 w-64 animate-pulse rounded" />
-        </div>
-        {Array.from({ length: UPCOMING_MONTH_COUNT }).map((_, index) => (
-          <MonthSkeleton key={index} />
+      <div aria-busy>
+        <div className="mag-skeleton mt-6 h-[340px] border-3 border-[var(--mag-ink)]" />
+        {Array.from({ length: Math.min(UPCOMING_MONTH_COUNT, 2) }).map((_, sectionIndex) => (
+          <div key={sectionIndex}>
+            <div className="mag-skeleton mt-14 mb-5 h-11 w-64" />
+            <ReleaseGrid>
+              {Array.from({ length: 6 }).map((_, index) => (
+                <ReleaseCardSkeleton key={index} />
+              ))}
+            </ReleaseGrid>
+          </div>
         ))}
       </div>
-    );
+    )
   }
 
+  const upcoming = sections.flatMap((section) => section.items)
+  const headliner = pickHeadliner(upcoming)
+
   return (
-    <section className="space-y-8">
-      <TodaySection items={todayItems} onAddToCalendar={onAddToCalendar} />
+    <section>
+      {headliner && (
+        <Headliner item={headliner} onOpen={onOpen} onAddToCalendar={onAddToCalendar} />
+      )}
 
-      <div className="border-border/60 flex items-center gap-3" aria-hidden>
-        <span className="bg-border h-px flex-1" />
-        <span className="text-muted text-xs font-medium tracking-wide uppercase">
-          {ui.gamesCalendar.upcomingLabel}
-        </span>
-        <span className="bg-border h-px flex-1" />
-      </div>
-
-      <header className="space-y-1">
-        <div className="flex items-center gap-2">
-          <CalendarDays size={18} className="text-accent" aria-hidden />
-          <h2 className="text-lg font-semibold">{ui.gamesCalendar.title}</h2>
-        </div>
-        <p className="text-muted text-sm">{ui.gamesCalendar.subtitle}</p>
-      </header>
+      <SectionHeading
+        title={ui.gamesCalendar.todayTitle}
+        count={formatDisplayDate(getTodayIso())}
+      />
+      {todayItems.length === 0 ? (
+        <p className="border-3 border-dashed border-[var(--mag-ink)] bg-white/60 px-4 py-5 text-center font-semibold">
+          {ui.gamesCalendar.emptyToday}
+        </p>
+      ) : (
+        <ReleaseGrid>
+          {todayItems.map((item) => (
+            <ReleaseCard key={item.id} item={item} onOpen={onOpen} />
+          ))}
+        </ReleaseGrid>
+      )}
 
       {sections.map(({ month, items }) => (
-        <div key={month.key} className="space-y-3">
-          <div className="flex items-center gap-3">
-            <span
-              className="bg-accent size-2 shrink-0 rounded-full"
-              aria-hidden
-            />
-            <h3 className="text-base font-semibold capitalize">
-              {month.label}
-            </h3>
-            <span className="text-muted text-xs">
-              {ui.gamesCalendar.count(items.length)}
-            </span>
-          </div>
-
+        <div key={month.key}>
+          <SectionHeading title={month.label} count={ui.gamesCalendar.count(items.length)} />
           {items.length === 0 ? (
-            <Card className="border-dashed text-center">
-              <Card.Content className="px-4 py-6">
-                <p className="text-muted text-sm">
-                  {ui.gamesCalendar.emptyMonth}
-                </p>
-              </Card.Content>
-            </Card>
+            <p className="border-3 border-dashed border-[var(--mag-ink)] bg-white/60 px-4 py-5 text-center font-semibold">
+              {ui.gamesCalendar.emptyMonth}
+            </p>
           ) : (
-            <div className="space-y-3">
+            <ReleaseGrid>
               {items.map((item) => (
-                <ResultCard
-                  key={item.id}
-                  item={item}
-                  onAddToCalendar={onAddToCalendar}
-                />
+                <ReleaseCard key={item.id} item={item} onOpen={onOpen} />
               ))}
-            </div>
+            </ReleaseGrid>
           )}
         </div>
       ))}
     </section>
-  );
+  )
 }

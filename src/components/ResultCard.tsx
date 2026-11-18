@@ -20,7 +20,8 @@ export function ResultCard({
   const isComics = item.category === 'comics'
   const isGames = item.category === 'games'
   const isReleased = item.isReleased === true
-  const canAddToCalendar = isFromTomorrowOrLater(item.releaseDate)
+  const canAddToCalendar =
+    item.dateCertainty === 'confirmed' && isFromTomorrowOrLater(item.releaseDate)
 
   function getGameTypeStyle(typeId?: number): CSSProperties | undefined {
     if (!typeId) return undefined

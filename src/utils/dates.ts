@@ -13,6 +13,23 @@ export function formatDisplayDate(isoDate?: string): string {
   }).format(date)
 }
 
+/** Compact day/month label, e.g. "03/12" (fr) or "12/03" (en). */
+export function formatShortDate(isoDate?: string): string | undefined {
+  if (!isoDate) return undefined
+  const [, month, day] = isoDate.split('-')
+  if (!month || !day) return undefined
+  return getLocale() === 'en' ? `${month}/${day}` : `${day}/${month}`
+}
+
+export function daysUntil(isoDate?: string): number | undefined {
+  if (!isoDate) return undefined
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const target = new Date(`${isoDate}T00:00:00`)
+  if (Number.isNaN(target.getTime())) return undefined
+  return Math.round((target.getTime() - today.getTime()) / 86_400_000)
+}
+
 export function toIsoDate(
   year?: number | null,
   month?: number | null,

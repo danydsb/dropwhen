@@ -70,3 +70,78 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- DropWhen « Mag » ---------- */
+:root {
+  --mag-paper: #f4f1ea;
+  --mag-ink: #111111;
+  --mag-yellow: #ffd83a;
+  --mag-blue: #2f5bff;
+  --mag-pink: #ff5da2;
+  --mag-green: #1fb57a;
+  --mag-muted: #5c5a55;
+}
+
+body {
+  font-family: 'Work Sans', system-ui, sans-serif;
+  background-color: var(--mag-paper);
+  background-image: radial-gradient(#0000000f 1px, transparent 1px);
+  background-size: 14px 14px;
+  color: var(--mag-ink);
+}
+
+.font-anton {
+  font-family: 'Anton', 'Impact', sans-serif;
+  font-weight: 400;
+}
+
+.font-marker {
+  font-family: 'Permanent Marker', cursive;
+}
+
+.mag-box {
+  border: 3px solid var(--mag-ink);
+  box-shadow: 5px 5px 0 var(--mag-ink);
+}
+
+.mag-press {
+  border: 3px solid var(--mag-ink);
+  box-shadow: 3px 3px 0 var(--mag-ink);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.mag-press:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--mag-ink);
+}
+.mag-press:focus-visible,
+.mag-card:focus-visible {
+  outline: 3px solid var(--mag-blue);
+  outline-offset: 3px;
+}
+
+.mag-card {
+  border: 3px solid var(--mag-ink);
+  box-shadow: 5px 5px 0 var(--mag-ink);
+  background: #fff;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.mag-grid > .mag-card:nth-child(3n) {
+  transform: rotate(0.6deg);
+}
+.mag-grid > .mag-card:nth-child(4n) {
+  transform: rotate(-0.7deg);
+}
+.mag-grid > .mag-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 8px 8px 0 var(--mag-ink);
+}
+
+.mag-skeleton {
+  background: repeating-linear-gradient(45deg, #e9e5db 0 10px, #f1eee6 10px 20px);
+  animation: mag-pulse 1.2s ease-in-out infinite;
+}
+@keyframes mag-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}

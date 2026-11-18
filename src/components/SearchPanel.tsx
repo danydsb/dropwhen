@@ -1,8 +1,9 @@
 import { getMinSearchQueryLength, isDemoMode } from '../config'
 import { useTranslation } from '../i18n'
-import { Card, Input } from '@heroui/react'
 import type { Category } from '../types'
-import { CategoryTabs } from './CategoryTabs'
+import { CATEGORY_ICONS } from './CategoryIcon'
+
+const CATEGORIES: Category[] = ['games', 'comics']
 
 export function SearchPanel({
   category,
@@ -16,43 +17,52 @@ export function SearchPanel({
   onQueryChange: (value: string) => void
 }) {
   const { ui } = useTranslation()
-  const categories: Category[] = ['games', 'comics']
   const trimmedQuery = query.trim()
   const minLength = getMinSearchQueryLength(category)
-  const isTooShort =
-    !isDemoMode() && trimmedQuery.length > 0 && trimmedQuery.length < minLength
+  const isTooShort = !isDemoMode() && trimmedQuery.length > 0 && trimmedQuery.length < minLength
 
   return (
-    <Card>
-      <Card.Content className="flex flex-col gap-4 p-4 sm:p-5">
-        <CategoryTabs
-          category={category}
-          categories={categories}
-          labels={ui.categories}
-          ariaLabel={ui.a11y.categorySwitch}
-          onCategoryChange={onCategoryChange}
+    <div className="mt-6">
+      <form
+        onSubmit={(event) => event.preventDefault()}
+        className="flex flex-wrap gap-2.5"
+      >
+        <div role="tablist" aria-label={ui.a11y.categorySwitch} className="flex gap-2.5">
+          {CATEGORIES.map((cat) => {
+            const Icon = CATEGORY_ICONS[cat]
+            const selected = cat === category
+            return (
+              <button
+                key={cat}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => onCategoryChange(cat)}
+                className={`mag-press inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-extrabold uppercase ${
+                  selected ? 'bg-[var(--mag-ink)] text-[var(--mag-yellow)]' : 'bg-white'
+                }`}
+              >
+                <Icon size={15} strokeWidth={2.5} aria-hidden />
+                {ui.categories[cat]}
+              </button>
+            )
+          })}
+        </div>
+        <input
+          type="search"
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+          placeholder={ui.search.placeholder}
+          autoComplete="off"
+          aria-label={ui.search.placeholder}
+          className="min-w-[220px] flex-1 border-3 border-[var(--mag-ink)] bg-white px-3 py-2 text-[15px] font-semibold shadow-[3px_3px_0_var(--mag-ink)] outline-none focus:shadow-[3px_3px_0_var(--mag-blue)]"
         />
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-          }}
-          className="flex flex-col gap-2"
-        >
-          <Input
-            type="search"
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            placeholder={ui.search.placeholder}
-            autoComplete="off"
-            fullWidth
-            className="min-w-0 flex-1"
-            aria-label={ui.search.placeholder}
-          />
-        </form>
-
-        {isTooShort ? <p className="text-center text-xs text-muted">{ui.search.minLengthHint(minLength)}</p> : null}
-      </Card.Content>
-    </Card>
+      </form>
+      {isTooShort && (
+        <p className="mt-2 text-xs font-semibold text-[var(--mag-muted)]">
+          {ui.search.minLengthHint(minLength)}
+        </p>
+      )}
+    </div>
   )
 }

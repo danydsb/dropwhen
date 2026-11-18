@@ -1,10 +1,9 @@
 import { useTranslation } from './i18n'
 import { useCallback, useEffect, useState } from 'react'
 import { getMinSearchQueryLength, isDemoMode } from './config'
-import type { Category } from './types'
+import type { Category, ReleaseItem } from './types'
 import { LanguageSwitch } from './components/LanguageSwitch'
-import { ThemeSwitch } from './components/ThemeSwitch'
-import { RelaxBackground } from './components/RelaxBackground'
+import { ReleaseDetail } from './components/ReleaseDetail'
 import { ToastyEasterEgg } from './components/ToastyEasterEgg'
 import { HeroSection } from './components/HeroSection'
 import { SearchPanel } from './components/SearchPanel'
@@ -23,6 +22,8 @@ function App() {
   const demoMode = isDemoMode()
   const { items, warning, loading, error, hasSearched, search, clear, getLastParams } = useSearch()
   const { addEvent } = useGoogleCalendar()
+  const [selected, setSelected] = useState<ReleaseItem | null>(null)
+  const closeDetail = useCallback(() => setSelected(null), [])
 
   const showGamesCalendar = category === 'games' && !hasSearched && !demoMode
   const {
@@ -79,19 +80,14 @@ function App() {
   const activeError = showGamesCalendar ? calendarErrorState : error
 
   return (
-    <div className="bg-background text-foreground relative min-h-dvh">
-      <RelaxBackground />
+    <div className="relative min-h-dvh">
       <ToastyEasterEgg />
 
-      <div className="fixed top-4 left-4 z-50 sm:left-8">
-        <LanguageSwitch />
-      </div>
+      <main className={`relative mx-auto ${CONTENT_MAX_WIDTH} px-4 pt-14 pb-20 sm:px-6 sm:pt-8`}>
+        <div className="absolute top-4 right-4 z-10 sm:static sm:mb-4 sm:flex sm:justify-end">
+          <LanguageSwitch />
+        </div>
 
-      <div className="fixed top-4 right-4 z-50 sm:right-8">
-        <ThemeSwitch />
-      </div>
-
-      <main className={`relative mx-auto ${CONTENT_MAX_WIDTH} space-y-6 px-4 py-8 sm:space-y-8 sm:px-8 sm:py-12 lg:space-y-10`}>
         <HeroSection />
 
         <SearchPanel
@@ -101,7 +97,7 @@ function App() {
           onQueryChange={setQuery}
         />
 
-        <div className="space-y-3">
+        <div className="mt-4 space-y-3 empty:hidden">
           {demoMode && <StatusBanner variant="info" message={ui.banners.demoActive} />}
           {activeWarning && !demoMode && <StatusBanner variant="warning" message={activeWarning} />}
           {activeError && <StatusBanner variant="error" message={activeError} />}
@@ -112,6 +108,7 @@ function App() {
             todayItems={calendarTodayItems}
             sections={calendarSections}
             loading={calendarLoading}
+            onOpen={setSelected}
             onAddToCalendar={addEvent}
           />
         ) : (
@@ -120,10 +117,12 @@ function App() {
             loading={loading}
             hasSearched={hasSearched}
             isDemoMode={demoMode}
-            onAddToCalendar={addEvent}
+            onOpen={setSelected}
           />
         )}
       </main>
+
+      <ReleaseDetail item={selected} onClose={closeDetail} onAddToCalendar={addEvent} />
     </div>
   )
 }

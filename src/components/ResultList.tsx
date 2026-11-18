@@ -1,74 +1,66 @@
 import { useTranslation } from '../i18n'
-import { Card } from '@heroui/react'
-import { CalendarSearch, SearchX, Sparkles } from 'lucide-react'
 import type { ReleaseItem } from '../types'
-import { ResultCard } from './ResultCard'
-import { ResultCardSkeleton } from './ResultCardSkeleton'
+import { ReleaseCard, ReleaseCardSkeleton, ReleaseGrid } from './ReleaseCard'
+
+function EmptyBox({ title, hint }: { title: string; hint: string }) {
+  return (
+    <div className="mag-box mt-6 bg-white px-6 py-14 text-center">
+      <h2 className="font-anton text-4xl uppercase">{title}</h2>
+      <p className="mx-auto mt-2 max-w-sm text-sm text-[var(--mag-muted)]">{hint}</p>
+    </div>
+  )
+}
 
 export function ResultList({
   items,
   loading,
   hasSearched,
   isDemoMode,
-  onAddToCalendar,
+  onOpen,
 }: {
   items: ReleaseItem[]
   loading: boolean
   hasSearched: boolean
   isDemoMode: boolean
-  onAddToCalendar: (item: ReleaseItem) => void
+  onOpen: (item: ReleaseItem) => void
 }) {
   const { ui } = useTranslation()
 
   if (loading) {
     return (
-      <div className="space-y-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <ResultCardSkeleton key={i} />
-        ))}
+      <div className="mt-6" aria-busy>
+        <ReleaseGrid>
+          {Array.from({ length: 6 }).map((_, index) => (
+            <ReleaseCardSkeleton key={index} />
+          ))}
+        </ReleaseGrid>
       </div>
     )
   }
 
   if (hasSearched && items.length === 0) {
-    return (
-      <Card className="border-dashed text-center">
-        <Card.Content className="px-6 py-14">
-          <SearchX className="text-muted mx-auto mb-3 size-10" aria-hidden />
-          <h2 className="text-lg font-semibold">{ui.empty.noResults}</h2>
-          <p className="text-muted mt-1 text-sm">{ui.search.placeholder}</p>
-        </Card.Content>
-      </Card>
-    )
+    return <EmptyBox title={ui.empty.noResults} hint={ui.search.placeholder} />
   }
 
   if (!hasSearched) {
     return (
-      <Card className="text-center">
-        <Card.Content className="px-6 py-16">
-          <div className="bg-accent/15 mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl">
-            <CalendarSearch className="text-accent size-7" aria-hidden />
-          </div>
-          <h2 className="text-lg font-semibold">{ui.empty.title}</h2>
-          <p className="text-muted mx-auto mt-2 max-w-sm text-sm leading-relaxed">
-            {isDemoMode ? ui.empty.hintDemo : ui.empty.hint}
-          </p>
-        </Card.Content>
-      </Card>
+      <EmptyBox title={ui.empty.title} hint={isDemoMode ? ui.empty.hintDemo : ui.empty.hint} />
     )
   }
 
   return (
-    <section className="space-y-4">
-      <div className="text-muted flex items-center gap-2 text-sm">
-        <Sparkles size={14} className="text-accent" aria-hidden />
-        <span>{ui.hero.resultsCount(items.length)}</span>
+    <section>
+      <div className="mt-10 mb-5 flex items-center gap-3.5">
+        <span className="bg-[var(--mag-ink)] px-2.5 py-1 text-[13px] font-extrabold text-[var(--mag-yellow)]">
+          {ui.hero.resultsCount(items.length)}
+        </span>
+        <hr className="flex-1 border-0 border-t-3 border-[var(--mag-ink)]" />
       </div>
-      <div className="space-y-3">
+      <ReleaseGrid>
         {items.map((item) => (
-          <ResultCard key={item.id} item={item} onAddToCalendar={onAddToCalendar} />
+          <ReleaseCard key={item.id} item={item} onOpen={onOpen} />
         ))}
-      </div>
+      </ReleaseGrid>
     </section>
   )
 }

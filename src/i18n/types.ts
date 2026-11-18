@@ -82,6 +82,24 @@ export type UiMessages = {
     link: (url: string) => string
     unknownDateNote: string
   }
+  mag: {
+    issue: (monthLabel: string) => string
+    mostAnticipated: string
+    countdown: (days: number) => string
+    countdownUnit: (days: number) => string
+    addToCalendar: string
+    followers: (count: number) => string
+    trailer: string
+    steam: string
+    viewSource: (source: string) => string
+    previousImage: string
+    nextImage: string
+    close: string
+    noImages: string
+    released: string
+    hype: string
+    openDetails: (title: string) => string
+  }
   a11y: {
     dismiss: string
     languageSwitch: string

@@ -59,7 +59,9 @@ export function toReleaseItem(release: UnifiedRelease): ReleaseItem {
     title: release.title,
     releaseDate: release.release_date,
     releaseDateLabel: release.release_date
-      ? formatDisplayDate(release.release_date)
+      ? release.date_certainty === 'estimated'
+        ? release.release_date.slice(0, 4)
+        : formatDisplayDate(release.release_date)
       : ui.dates.toConfirm,
     dateCertainty: release.date_certainty ?? (release.release_date ? 'confirmed' : 'unknown'),
     isReleased: release.release_date ? isPastRelease(release.release_date) : undefined,

@@ -1,6 +1,7 @@
 import { getUi } from '../i18n'
 import type { ReleaseItem, SearchResult } from '../types'
 import { getUpcomingDateRange } from '../utils/calendar-months'
+import { getIntlLocale, getLocale } from '../i18n'
 import { formatDisplayDate, isPastRelease, normalizeSearchTerm } from '../utils/dates'
 
 interface IgdbNamedEntity {
@@ -35,8 +36,25 @@ interface IgdbGameType {
   type?: string
 }
 
+interface IgdbGameReleaseDate {
+  date?: number
+  /** 0 = exact day, 1 = month, 2 = year, 3-6 = Q1-Q4, 7 = TBD */
+  date_format?: number
+}
+
+interface IgdbWebsite {
+  url?: string
+  type?: number
+}
+
 interface IgdbGame {
   id: number
+  hypes?: number
+  summary?: string
+  screenshots?: IgdbArtwork[]
+  videos?: Array<{ video_id?: string }>
+  websites?: IgdbWebsite[]
+  release_dates?: IgdbGameReleaseDate[]
   name: string
   slug?: string
   first_release_date?: number
@@ -50,11 +68,22 @@ interface IgdbGame {
 
 const IGDB_MAIN_GAME_TYPE_ID = 0
 
-interface IgdbReleaseDate {
-  id: number
-  date?: number
-  game?: IgdbGame
-}
+/**
+ * Minimum IGDB "hypes" (follows before release) for a game to appear in the
+ * upcoming calendar. Filters out the long tail of tiny indies/shovelware while
+ * keeping AAA, AA and anticipated indies (Witchbrook, Pony Island 2…).
+ */
+const UPCOMING_MIN_HYPES = 10
+
+/**
+ * Excludes adult titles (suggestive visual novels…): IGDB theme "Erotic" (42)
+ * and the "nsfw" (2509) / "eroge" (847) keywords. Age-rating descriptors are
+ * deliberately not used: they would also drop GTA VI, Fable, Persona…
+ */
+const ADULT_CONTENT_FILTER = 'themes != (42) & keywords != (2509,847)'
+
+const IGDB_WEBSITE_TYPE_STEAM = 13
+const MAX_GALLERY_IMAGES = 12
 
 interface IgdbProxyError {
   error?: string
@@ -81,11 +110,67 @@ function getArtworkUrl(artworks?: IgdbArtwork[]): string | undefined {
   return artwork.url
 }
 
+function toImageUrl(item: IgdbArtwork, size: string): string | undefined {
+  if (item.image_id) return `https://images.igdb.com/igdb/image/upload/${size}/${item.image_id}.jpg`
+  if (!item.url) return undefined
+  const url = item.url.startsWith('//') ? `https:${item.url}` : item.url
+  return url.replace(/\/t_[a-z0-9_]+\//, `/${size}/`)
+}
+
+function getGalleryUrls(game: IgdbGame): string[] {
+  return [...(game.screenshots ?? []), ...(game.artworks ?? [])]
+    .map((item) => toImageUrl(item, 't_1080p'))
+    .filter((url): url is string => Boolean(url))
+    .slice(0, MAX_GALLERY_IMAGES)
+}
+
+function getSteamUrl(game: IgdbGame): string | undefined {
+  return game.websites?.find(
+    (site) => site.type === IGDB_WEBSITE_TYPE_STEAM || site.url?.includes('store.steampowered.com'),
+  )?.url
+}
+
+function getTrailerUrl(game: IgdbGame): string | undefined {
+  const videoId = game.videos?.find((video) => video.video_id)?.video_id
+  return videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined
+}
+
 function toIsoDate(timestampSeconds?: number): string | undefined {
   if (!timestampSeconds) return undefined
   const date = new Date(timestampSeconds * 1000)
   if (Number.isNaN(date.getTime())) return undefined
   return date.toISOString().slice(0, 10)
+}
+
+const IGDB_DATE_FORMAT_EXACT = 0
+const IGDB_DATE_FORMAT_MONTH = 1
+const IGDB_DATE_FORMAT_YEAR = 2
+const IGDB_DATE_FORMAT_Q1 = 3
+const IGDB_DATE_FORMAT_Q4 = 6
+
+function getFirstReleaseDateFormat(game: IgdbGame): number {
+  const match = game.release_dates?.find((item) => item.date === game.first_release_date)
+  return match?.date_format ?? IGDB_DATE_FORMAT_EXACT
+}
+
+function formatApproximateDate(timestampSeconds: number, dateFormat: number): string | undefined {
+  const date = new Date(timestampSeconds * 1000)
+  const year = date.getUTCFullYear()
+
+  if (dateFormat === IGDB_DATE_FORMAT_MONTH) {
+    const label = new Intl.DateTimeFormat(getIntlLocale(getLocale()), {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(date)
+    return label.charAt(0).toUpperCase() + label.slice(1)
+  }
+  if (dateFormat === IGDB_DATE_FORMAT_YEAR) return String(year)
+  if (dateFormat >= IGDB_DATE_FORMAT_Q1 && dateFormat <= IGDB_DATE_FORMAT_Q4) {
+    const quarter = dateFormat - IGDB_DATE_FORMAT_Q1 + 1
+    return getLocale() === 'fr' ? `T${quarter} ${year}` : `Q${quarter} ${year}`
+  }
+  return undefined
 }
 
 function computeTitleMatchScore(title: string, query: string): number {
@@ -184,6 +269,11 @@ function getGameTypeId(game: IgdbGame): number | undefined {
 function mapIgdbGame(game: IgdbGame): ReleaseItem {
   const ui = getUi()
   const releaseDate = toIsoDate(game.first_release_date)
+  const dateFormat = getFirstReleaseDateFormat(game)
+  const approximateLabel =
+    game.first_release_date && dateFormat !== IGDB_DATE_FORMAT_EXACT
+      ? formatApproximateDate(game.first_release_date, dateFormat)
+      : undefined
 
   const developerNames =
     game.involved_companies
@@ -199,8 +289,8 @@ function mapIgdbGame(game: IgdbGame): ReleaseItem {
     id: `igdb-${game.id}`,
     title: game.name,
     releaseDate,
-    releaseDateLabel: releaseDate ? formatDisplayDate(releaseDate) : ui.dates.tba,
-    dateCertainty: releaseDate ? 'confirmed' : 'unknown',
+    releaseDateLabel: approximateLabel ?? (releaseDate ? formatDisplayDate(releaseDate) : ui.dates.tba),
+    dateCertainty: !releaseDate ? 'unknown' : approximateLabel ? 'estimated' : 'confirmed',
     isReleased: releaseDate ? isPastRelease(releaseDate) : undefined,
     platformOrPublisher: joinNames(game.platforms?.map((platform) => platform.name) ?? [], 4),
     genres: game.genres?.map((genre) => genre.name).slice(0, 4),
@@ -209,6 +299,12 @@ function mapIgdbGame(game: IgdbGame): ReleaseItem {
     imageUrl: getImageUrl(game.cover) ?? getArtworkUrl(game.artworks),
     gameTypeLabel: getGameTypeLabel(game),
     gameTypeId: getGameTypeId(game),
+    images: getGalleryUrls(game),
+    artworkUrl: game.artworks?.[0] ? toImageUrl(game.artworks[0], 't_1080p') : undefined,
+    summary: game.summary,
+    trailerUrl: getTrailerUrl(game),
+    steamUrl: getSteamUrl(game),
+    hypes: game.hypes,
     source: 'IGDB',
     sourceUrl: game.slug ? `https://www.igdb.com/games/${game.slug}` : undefined,
     category: 'games',
@@ -256,6 +352,9 @@ function resolveIgdbWarning(error: unknown): string {
   return ui.warnings.rawgUnavailable(detail)
 }
 
+const GAME_FIELDS =
+  'name,slug,hypes,summary,screenshots.image_id,videos.video_id,websites.url,websites.type,first_release_date,release_dates.date,release_dates.date_format,game_type.id,game_type.type,cover.image_id,cover.url,cover.width,cover.height,artworks.image_id,artworks.url,artworks.width,artworks.height,genres.name,platforms.name,involved_companies.developer,involved_companies.porting,involved_companies.supporting,involved_companies.publisher,involved_companies.company.name'
+
 const UPCOMING_CACHE_TTL_MS = 60 * 60 * 1000
 const upcomingCache = new Map<string, { expiresAt: number; value: SearchResult }>()
 const upcomingInFlight = new Map<string, Promise<SearchResult>>()
@@ -263,8 +362,8 @@ const upcomingInFlight = new Map<string, Promise<SearchResult>>()
 export async function searchGames(query: string): Promise<SearchResult> {
   const request = [
     `search "${query.replaceAll('"', '\\"')}";`,
-    'fields name,slug,first_release_date,game_type.id,game_type.type,cover.image_id,cover.url,cover.width,cover.height,artworks.image_id,artworks.url,artworks.width,artworks.height,genres.name,platforms.name,involved_companies.developer,involved_companies.porting,involved_companies.supporting,involved_companies.publisher,involved_companies.company.name;',
-    'where version_parent = null;',
+    `fields ${GAME_FIELDS};`,
+    `where version_parent = null & ${ADULT_CONTENT_FILTER};`,
     'limit 50;',
   ].join(' ')
 
@@ -282,36 +381,16 @@ async function fetchUpcomingGamesFromApi(start: string, end: string): Promise<Se
   const startTimestamp = Math.floor(new Date(`${start}T00:00:00Z`).getTime() / 1000)
   const endTimestamp = Math.floor(new Date(`${end}T23:59:59Z`).getTime() / 1000)
 
+  // Query games directly (not release_dates): a 500-row release_dates page only
+  // covered a few days, and the hype filter has to run server-side.
   const query = [
-    'fields date,game.name,game.slug,game.first_release_date,game.game_type.id,game.game_type.type,game.cover.image_id,game.cover.url,game.cover.width,game.cover.height,game.artworks.image_id,game.artworks.url,game.artworks.width,game.artworks.height,game.genres.name,game.platforms.name,game.involved_companies.developer,game.involved_companies.porting,game.involved_companies.supporting,game.involved_companies.publisher,game.involved_companies.company.name;',
-    `where date >= ${startTimestamp} & date <= ${endTimestamp} & game.version_parent = null;`,
-    'sort date asc;',
+    `fields ${GAME_FIELDS};`,
+    `where first_release_date >= ${startTimestamp} & first_release_date <= ${endTimestamp} & version_parent = null & hypes >= ${UPCOMING_MIN_HYPES} & ${ADULT_CONTENT_FILTER};`,
+    'sort first_release_date asc;',
     'limit 500;',
   ].join(' ')
 
-  const releaseDates = await igdbPost<IgdbReleaseDate[]>('release_dates', query)
-
-  const byGame = new Map<number, IgdbGame>()
-  for (const item of releaseDates) {
-    if (!item.game?.id) continue
-
-    const existing = byGame.get(item.game.id)
-    const candidateDate = item.date ?? item.game.first_release_date
-    const existingDate = existing?.first_release_date
-
-    if (!existing || (candidateDate && (!existingDate || candidateDate < existingDate))) {
-      byGame.set(item.game.id, {
-        ...item.game,
-        first_release_date: candidateDate ?? item.game.first_release_date,
-      })
-    }
-  }
-
-  const unique = [...byGame.values()].sort((a, b) => {
-    const dateA = a.first_release_date ?? Number.MAX_SAFE_INTEGER
-    const dateB = b.first_release_date ?? Number.MAX_SAFE_INTEGER
-    return dateA - dateB
-  })
+  const unique = await igdbPost<IgdbGame[]>('games', query)
 
   return {
     items: unique.map(mapIgdbGame),

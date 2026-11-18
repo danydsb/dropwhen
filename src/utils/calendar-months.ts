@@ -49,11 +49,13 @@ export function groupReleaseItemsByMonth(
   months: MonthSection[],
 ): { todayItems: ReleaseItem[]; sections: Array<{ month: MonthSection; items: ReleaseItem[] }> } {
   const todayItems = items
-    .filter((item) => isToday(item.releaseDate))
+    .filter((item) => item.dateCertainty === 'confirmed' && isToday(item.releaseDate))
     .sort((a, b) => a.title.localeCompare(b.title))
 
   const upcoming = items.filter(
-    (item) => isFutureOrToday(item.releaseDate) && !isToday(item.releaseDate),
+    (item) =>
+      isFutureOrToday(item.releaseDate) &&
+      !(item.dateCertainty === 'confirmed' && isToday(item.releaseDate)),
   )
 
   const sections = months.map((month) => ({

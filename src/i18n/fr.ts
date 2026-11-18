@@ -19,7 +19,7 @@ export const fr: UiMessages = {
 
   gamesCalendar: {
     title: 'Calendrier des sorties Jeux vidéo',
-    subtitle: '6 prochains mois via IGDB',
+    subtitle: 'Les jeux attendus des 6 prochains mois (AAA, AA et indés suivis) via IGDB',
     todayTitle: 'Sorties du jour',
     todaySubtitle: 'Les jeux qui sortent aujourd’hui',
     upcomingLabel: 'À venir',
@@ -103,6 +103,25 @@ export const fr: UiMessages = {
     publisher: (name) => `Éditeur / plateforme : ${name}`,
     link: (url) => `Fiche : ${url}`,
     unknownDateNote: 'Date inconnue — événement créé à la date du jour.',
+  },
+
+  mag: {
+    issue: (monthLabel) => `N° ${monthLabel}`,
+    mostAnticipated: 'Le plus attendu du moment',
+    countdown: (days) => (days <= 0 ? 'Jour J' : `J-${days}`),
+    countdownUnit: (days) => (days === 1 ? 'demain !' : days <= 0 ? 'aujourd’hui !' : 'jours'),
+    addToCalendar: 'Dans mon agenda',
+    followers: (count) => `${count} joueur${count > 1 ? 's' : ''} l’attend${count > 1 ? 'ent' : ''} sur IGDB`,
+    trailer: 'Trailer',
+    steam: 'Page Steam',
+    viewSource: (source) => `Fiche ${source}`,
+    previousImage: 'Image précédente',
+    nextImage: 'Image suivante',
+    close: 'Fermer',
+    noImages: 'Pas encore d’images pour celui-là.',
+    released: 'Sorti',
+    hype: 'hype !!',
+    openDetails: (title) => `Voir la fiche de ${title}`,
   },
 
   a11y: {

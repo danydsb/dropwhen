@@ -18,6 +18,16 @@ export interface ReleaseItem {
   gameTypeLabel?: string
   /** IGDB game_type.id for per-type color styling */
   gameTypeId?: number
+  /** Extra visuals (screenshots, artworks) shown in the detail gallery */
+  images?: string[]
+  /** Wide artwork used for hero banners */
+  artworkUrl?: string
+  summary?: string
+  trailerUrl?: string
+  /** Store page preferred over the source listing when available */
+  steamUrl?: string
+  /** IGDB follows before release — popularity signal */
+  hypes?: number
   source: string
   sourceUrl?: string
   category: Category
