@@ -6,7 +6,7 @@ function EmptyBox({ title, hint }: { title: string; hint: string }) {
   return (
     <div className="mag-box mt-6 bg-white px-6 py-14 text-center">
       <h2 className="font-anton text-4xl uppercase">{title}</h2>
-      <p className="mx-auto mt-2 max-w-sm text-sm text-[var(--mag-muted)]">{hint}</p>
+      <p className="mx-auto mt-2 max-w-sm text-sm text-(--mag-muted)">{hint}</p>
     </div>
   )
 }
@@ -51,10 +51,10 @@ export function ResultList({
   return (
     <section>
       <div className="mt-10 mb-5 flex items-center gap-3.5">
-        <span className="bg-[var(--mag-ink)] px-2.5 py-1 text-[13px] font-extrabold text-[var(--mag-yellow)]">
+        <span className="bg-(--mag-ink) px-2.5 py-1 text-[13px] font-extrabold text-(--mag-yellow)">
           {ui.hero.resultsCount(items.length)}
         </span>
-        <hr className="flex-1 border-0 border-t-3 border-[var(--mag-ink)]" />
+        <hr className="flex-1 border-0 border-t-3 border-(--mag-ink)" />
       </div>
       <ReleaseGrid>
         {items.map((item) => (

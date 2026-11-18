@@ -13,8 +13,8 @@ export function LanguageSwitch() {
           type="button"
           aria-pressed={locale === value}
           onClick={() => setLocale(value)}
-          className={`-ml-[3px] border-3 border-[var(--mag-ink)] px-2.5 py-1 text-xs font-extrabold uppercase first:ml-0 ${
-            locale === value ? 'bg-[var(--mag-ink)] text-[var(--mag-yellow)]' : 'bg-white'
+          className={`-ml-[3px] border-3 border-(--mag-ink) px-2.5 py-1 text-xs font-extrabold uppercase first:ml-0 ${
+            locale === value ? 'bg-(--mag-ink) text-(--mag-yellow)' : 'bg-white'
           }`}
         >
           {ui.language[value]}

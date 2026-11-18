@@ -12,7 +12,7 @@ export function HeroSection() {
       <div className="flex flex-wrap items-center justify-between gap-3">
       <h1 className="font-anton text-[56px] leading-[0.85] uppercase sm:text-[104px]">
         Drop
-        <span className="inline-block -rotate-2 border-3 border-[var(--mag-ink)] bg-[var(--mag-yellow)] px-[0.08em]">
+        <span className="inline-block -rotate-2 border-3 border-(--mag-ink) bg-(--mag-yellow) px-[0.08em]">
           when
         </span>
       </h1>
@@ -20,7 +20,7 @@ export function HeroSection() {
         {ui.mag.issue(monthLabel)}
       </span>
       </div>
-      <p className="mt-3 max-w-[60ch] text-sm text-[var(--mag-muted)]">{ui.hero.subtitle}</p>
+      <p className="mt-3 max-w-[60ch] text-sm text-(--mag-muted)">{ui.hero.subtitle}</p>
     </header>
   )
 }

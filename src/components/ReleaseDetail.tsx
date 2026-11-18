@@ -19,7 +19,7 @@ function DetailLink({
       target="_blank"
       rel="noopener noreferrer"
       className={`mag-press inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-extrabold uppercase ${
-        primary ? 'bg-[var(--mag-blue)] text-white' : 'bg-white'
+        primary ? 'bg-(--mag-blue) text-white' : 'bg-white'
       }`}
     >
       {children}
@@ -107,7 +107,7 @@ export function ReleaseDetail({
         role="dialog"
         aria-modal="true"
         aria-label={item.title}
-        className="grid max-h-[calc(100dvh-24px)] w-full max-w-[1100px] overflow-auto border-3 border-[var(--mag-ink)] bg-white shadow-[8px_8px_0_var(--mag-ink)] md:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]"
+        className="grid max-h-[calc(100dvh-24px)] w-full max-w-[1100px] overflow-auto border-3 border-(--mag-ink) bg-white shadow-[8px_8px_0_var(--mag-ink)] md:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]"
       >
         <div className="relative flex min-w-0 flex-col bg-black">
           {images.length > 0 ? (
@@ -129,7 +129,7 @@ export function ReleaseDetail({
                     type="button"
                     onClick={() => go(-1)}
                     aria-label={ui.mag.previousImage}
-                    className="absolute top-1/2 left-2.5 flex size-10 -translate-y-1/2 items-center justify-center border-2 border-[var(--mag-ink)] bg-[var(--mag-yellow)]"
+                    className="absolute top-1/2 left-2.5 flex size-10 -translate-y-1/2 items-center justify-center border-2 border-(--mag-ink) bg-(--mag-yellow)"
                   >
                     <ChevronLeft size={22} strokeWidth={3} />
                   </button>
@@ -137,7 +137,7 @@ export function ReleaseDetail({
                     type="button"
                     onClick={() => go(1)}
                     aria-label={ui.mag.nextImage}
-                    className="absolute top-1/2 right-2.5 flex size-10 -translate-y-1/2 items-center justify-center border-2 border-[var(--mag-ink)] bg-[var(--mag-yellow)]"
+                    className="absolute top-1/2 right-2.5 flex size-10 -translate-y-1/2 items-center justify-center border-2 border-(--mag-ink) bg-(--mag-yellow)"
                   >
                     <ChevronRight size={22} strokeWidth={3} />
                   </button>
@@ -150,7 +150,7 @@ export function ReleaseDetail({
                         aria-label={`${thumbIndex + 1} / ${images.length}`}
                         className={`h-14 flex-none border-2 ${
                           thumbIndex === index
-                            ? 'border-[var(--mag-yellow)] opacity-100'
+                            ? 'border-(--mag-yellow) opacity-100'
                             : 'border-transparent opacity-50 hover:opacity-80'
                         }`}
                       >
@@ -189,26 +189,26 @@ export function ReleaseDetail({
               <img
                 src={item.imageUrl}
                 alt=""
-                className="aspect-3/4 w-[76px] flex-none border-3 border-[var(--mag-ink)] object-cover"
+                className="aspect-3/4 w-[76px] flex-none border-3 border-(--mag-ink) object-cover"
               />
             )}
             <div className="min-w-0">
               <h2 className="font-anton text-[30px] leading-[0.95] uppercase sm:text-[34px]">
                 {item.title}
               </h2>
-              <p className="mt-1.5 font-bold text-[var(--mag-blue)]">
+              <p className="mt-1.5 font-bold text-(--mag-blue)">
                 {item.releaseDateLabel}
                 {days !== undefined && days > 0 ? ` · ${ui.mag.countdown(days)}` : ''}
               </p>
             </div>
           </div>
 
-          {meta && <p className="text-[13px] text-[var(--mag-muted)]">{meta}</p>}
+          {meta && <p className="text-[13px] text-(--mag-muted)">{meta}</p>}
           {item.summary && (
             <p className="line-clamp-[9] text-sm leading-relaxed">{item.summary}</p>
           )}
           {item.hypes ? (
-            <p className="text-[13px] text-[var(--mag-muted)]">{ui.mag.followers(item.hypes)}</p>
+            <p className="text-[13px] text-(--mag-muted)">{ui.mag.followers(item.hypes)}</p>
           ) : null}
 
           <div className="mt-auto flex flex-wrap gap-2 pt-2">
@@ -233,7 +233,7 @@ export function ReleaseDetail({
               <button
                 type="button"
                 onClick={() => onAddToCalendar(item)}
-                className="mag-press inline-flex items-center gap-1.5 bg-[var(--mag-yellow)] px-3 py-2 text-[13px] font-extrabold uppercase"
+                className="mag-press inline-flex items-center gap-1.5 bg-(--mag-yellow) px-3 py-2 text-[13px] font-extrabold uppercase"
               >
                 <CalendarPlus size={14} aria-hidden />
                 {ui.mag.addToCalendar}

@@ -35,7 +35,7 @@ export function ReleaseCard({
       className="mag-card relative block w-full cursor-pointer text-left"
       aria-label={ui.mag.openDetails(item.title)}
     >
-      <div className="aspect-3/4 w-full overflow-hidden border-b-3 border-[var(--mag-ink)] bg-[#e9e5db]">
+      <div className="aspect-3/4 w-full overflow-hidden border-b-3 border-(--mag-ink) bg-[#e9e5db]">
         {item.imageUrl ? (
           <img
             src={item.imageUrl}
@@ -51,9 +51,9 @@ export function ReleaseCard({
       </div>
 
       <span
-        className={`absolute -top-3 -right-2.5 rotate-6 border-3 border-[var(--mag-ink)] ${
+        className={`absolute -top-3 -right-2.5 rotate-6 border-3 border-(--mag-ink) ${
           tag.exact
-            ? 'font-anton bg-[var(--mag-yellow)] px-2 py-1 text-xl leading-none'
+            ? 'font-anton bg-(--mag-yellow) px-2 py-1 text-xl leading-none'
             : 'bg-white px-1.5 py-1 text-[11px] font-extrabold uppercase'
         }`}
       >
@@ -61,11 +61,11 @@ export function ReleaseCard({
       </span>
 
       {item.isReleased ? (
-        <span className="absolute top-2 left-2 -rotate-3 border-2 border-[var(--mag-ink)] bg-[var(--mag-green)] px-2 py-0.5 text-xs font-extrabold text-white uppercase">
+        <span className="absolute top-2 left-2 -rotate-3 border-2 border-(--mag-ink) bg-(--mag-green) px-2 py-0.5 text-xs font-extrabold text-white uppercase">
           {ui.mag.released}
         </span>
       ) : (item.hypes ?? 0) >= HYPE_STICKER_THRESHOLD ? (
-        <span className="font-marker absolute top-2 left-2 -rotate-3 border-2 border-[var(--mag-ink)] bg-[var(--mag-pink)] px-2 text-sm text-white">
+        <span className="font-marker absolute top-2 left-2 -rotate-3 border-2 border-(--mag-ink) bg-(--mag-pink) px-2 text-sm text-white">
           {ui.mag.hype}
         </span>
       ) : null}
@@ -75,11 +75,11 @@ export function ReleaseCard({
           {item.title}
         </h4>
         {item.gameTypeLabel && (
-          <span className="mt-1 inline-block bg-[var(--mag-ink)] px-1.5 text-[10px] font-bold text-[var(--mag-yellow)] uppercase">
+          <span className="mt-1 inline-block bg-(--mag-ink) px-1.5 text-[10px] font-bold text-(--mag-yellow) uppercase">
             {item.gameTypeLabel}
           </span>
         )}
-        {subtitle && <p className="mt-1 line-clamp-1 text-xs text-[var(--mag-muted)]">{subtitle}</p>}
+        {subtitle && <p className="mt-1 line-clamp-1 text-xs text-(--mag-muted)">{subtitle}</p>}
       </div>
     </button>
   )
@@ -88,7 +88,7 @@ export function ReleaseCard({
 export function ReleaseCardSkeleton() {
   return (
     <div className="mag-card" aria-hidden>
-      <div className="mag-skeleton aspect-3/4 w-full border-b-3 border-[var(--mag-ink)]" />
+      <div className="mag-skeleton aspect-3/4 w-full border-b-3 border-(--mag-ink)" />
       <div className="space-y-2 p-2.5">
         <div className="mag-skeleton h-4 w-4/5" />
         <div className="mag-skeleton h-3 w-1/2" />

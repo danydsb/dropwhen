@@ -120,6 +120,9 @@ function App() {
             onOpen={setSelected}
           />
         )}
+        <footer className="mt-20 text-center text-[11px] font-semibold tracking-widest text-(--mag-muted) uppercase opacity-70">
+          © {new Date().getFullYear()} FC MOUCHE
+        </footer>
       </main>
 
       <ReleaseDetail item={selected} onClose={closeDetail} onAddToCalendar={addEvent} />
