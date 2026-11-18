@@ -32,7 +32,7 @@ export function ReleaseCard({
     <button
       type="button"
       onClick={() => onOpen(item)}
-      className="mag-card relative block w-full cursor-pointer text-left"
+      className="mag-card relative flex w-full cursor-pointer flex-col justify-start text-left"
       aria-label={ui.mag.openDetails(item.title)}
     >
       <div className="aspect-3/4 w-full overflow-hidden border-b-3 border-(--mag-ink) bg-[#e9e5db]">
