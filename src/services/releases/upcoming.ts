@@ -3,6 +3,7 @@ import type { SearchResult } from '../../types'
 import { isFutureOrToday, normalizeSearchTerm } from '../../utils/dates'
 import { searchOpenLibrary } from '../open-library'
 import { searchUrbanComics } from '../urban-comics'
+import { searchUpcomingComics } from '../comics-upcoming'
 import {
   dedupeReleases,
   fromOpenLibrary,
@@ -50,10 +51,13 @@ function collectSources(items: UnifiedRelease[]): string[] {
 export async function searchComics(query: string): Promise<SearchResult> {
   const ui = getUi()
 
-  const [urbanResult, openLibraryResult] = await Promise.allSettled([
+  const [urbanResult, openLibraryResult, glenatResult] = await Promise.allSettled([
     searchUrbanComics(query),
     searchOpenLibrary(query),
+    searchUpcomingComics(query),
   ])
+  // Upcoming French releases (publishers' "À paraître" pages) come first.
+  const upcomingFr = glenatResult.status === 'fulfilled' ? glenatResult.value : []
 
   const mapped: UnifiedRelease[] = []
 
@@ -66,12 +70,16 @@ export async function searchComics(query: string): Promise<SearchResult> {
   }
 
   const filtered = filterComicReleases(mapped, query)
-  const releaseItems = filtered.slice(0, 20).map((item) => toReleaseItem(item))
+  const releaseItems = [
+    ...upcomingFr,
+    ...filtered.slice(0, Math.max(0, 20 - upcomingFr.length)).map((item) => toReleaseItem(item)),
+  ]
 
   if (releaseItems.length > 0) {
+    const sources = collectSources(filtered.slice(0, 20))
     return {
       items: releaseItems,
-      warning: ui.warnings.comicsOk(collectSources(filtered.slice(0, 20))),
+      warning: ui.warnings.comicsOk(upcomingFr.length > 0 ? ['Glénat', ...sources] : sources),
     }
   }
 

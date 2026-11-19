@@ -1,4 +1,4 @@
-export type Category = 'games' | 'comics'
+export type Category = 'games' | 'comics' | 'content'
 
 export type DateCertainty = 'confirmed' | 'estimated' | 'unknown'
 
@@ -26,6 +26,24 @@ export interface ReleaseItem {
   trailerUrl?: string
   /** Store page preferred over the source listing when available */
   steamUrl?: string
+  /** Base game of a DLC / season / patch (content tab) */
+  parentTitle?: string
+  /** Content still running (current season, latest update) */
+  ongoing?: boolean
+  /** Patch notes (or most relevant official article) — shown as the main link */
+  notesUrl?: string
+  /** Label of the `notesUrl` button (defaults to "Patch notes") */
+  notesLabel?: string
+  /** Manga or BD (French comics calendar) */
+  bookKind?: 'manga' | 'bd'
+  /** Special edition flag detected in the title (Collector, Prestige, Deluxe…) */
+  specialEdition?: string
+  /** Kind of content (content tab only) */
+  contentKind?: 'dlc' | 'expansion' | 'season' | 'patch' | 'update' | 'pack' | 'set' | 'launch'
+  /** Estimated date that is still precise to the day (e.g. next TFT set) */
+  approximateDay?: boolean
+  /** End of a season, when known (ISO date) */
+  endDate?: string
   /** IGDB follows before release — popularity signal */
   hypes?: number
   source: string

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { CalendarPlus, Check, ChevronLeft, ChevronRight, ExternalLink, Play, Share2, X } from 'lucide-react'
+import { CalendarPlus, Check, ChevronLeft, ChevronRight, ExternalLink, FileText, Play, Share2, X } from 'lucide-react'
 import { useTranslation } from '../i18n'
 import type { ReleaseItem } from '../types'
-import { daysUntil, isFromTomorrowOrLater } from '../utils/dates'
+import { daysUntil, formatDisplayDate, isFromTomorrowOrLater } from '../utils/dates'
 
 function DetailLink({
   href,
@@ -80,8 +80,8 @@ export function ReleaseDetail({
   const days = item.dateCertainty === 'confirmed' ? daysUntil(item.releaseDate) : undefined
   const canAddToCalendar =
     item.dateCertainty === 'confirmed' && isFromTomorrowOrLater(item.releaseDate)
-  const shareUrl = item.steamUrl ?? item.sourceUrl
-  const meta = [item.developer, item.genres?.join(', '), item.platformOrPublisher]
+  const shareUrl = item.notesUrl ?? item.steamUrl ?? item.sourceUrl
+  const meta = [item.parentTitle, item.developer, item.genres?.join(', '), item.platformOrPublisher]
     .filter(Boolean)
     .join(' — ')
 
@@ -197,7 +197,11 @@ export function ReleaseDetail({
                 {item.title}
               </h2>
               <p className="mt-1.5 font-bold text-(--mag-blue)">
-                {item.releaseDateLabel}
+                {item.ongoing && item.endDate
+                  ? ui.content.ongoingUntil(formatDisplayDate(item.endDate))
+                  : item.ongoing && item.releaseDate
+                    ? ui.content.ongoingSince(formatDisplayDate(item.releaseDate))
+                    : item.releaseDateLabel}
                 {days !== undefined && days > 0 ? ` · ${ui.mag.countdown(days)}` : ''}
               </p>
             </div>
@@ -212,8 +216,14 @@ export function ReleaseDetail({
           ) : null}
 
           <div className="mt-auto flex flex-wrap gap-2 pt-2">
+            {item.notesUrl && (
+              <DetailLink href={item.notesUrl} primary>
+                <FileText size={14} aria-hidden />
+                {item.notesLabel ?? ui.content.patchNotes}
+              </DetailLink>
+            )}
             {item.trailerUrl && (
-              <DetailLink href={item.trailerUrl} primary>
+              <DetailLink href={item.trailerUrl} primary={!item.notesUrl}>
                 <Play size={14} fill="currentColor" aria-hidden />
                 {ui.mag.trailer}
               </DetailLink>
@@ -223,7 +233,7 @@ export function ReleaseDetail({
                 {ui.mag.steam}
                 <ExternalLink size={13} aria-hidden />
               </DetailLink>
-            ) : item.sourceUrl ? (
+            ) : item.sourceUrl && item.sourceUrl !== item.notesUrl ? (
               <DetailLink href={item.sourceUrl}>
                 {ui.mag.viewSource(item.source)}
                 <ExternalLink size={13} aria-hidden />

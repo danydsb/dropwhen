@@ -26,11 +26,13 @@ function buildTimedDates(releaseDate?: string): string {
 const CALENDAR_TITLE_EMOJI: Record<ReleaseItem['category'], string> = {
   games: '🎮',
   comics: '📚',
+  content: '🧩',
 }
 
 function buildEventTitle(item: ReleaseItem): string {
   const emoji = CALENDAR_TITLE_EMOJI[item.category]
-  return `${emoji} ${item.title}`
+  const title = item.parentTitle ? `${item.parentTitle} — ${item.title}` : item.title
+  return `${emoji} ${title}`
 }
 
 function buildEventDescription(item: ReleaseItem): string {

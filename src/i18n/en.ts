@@ -4,6 +4,7 @@ export const en: UiMessages = {
   categories: {
     games: 'Video games',
     comics: 'Comics & graphic novels',
+    content: 'Content & seasons',
   },
 
   header: {
@@ -104,6 +105,58 @@ export const en: UiMessages = {
     unknownDateNote: 'Unknown release date — event created for today.',
   },
 
+  comicsCalendar: {
+    title: 'Coming soon in France',
+    intro:
+      'Upcoming French comics and manga announced by publishers (Glénat for now), over the next three months. Type a title to also search the other sources.',
+    all: 'All',
+    manga: 'Manga',
+    bd: 'Comics',
+    specialOnly: 'Special editions',
+    count: (count) => `${count} release${count === 1 ? '' : 's'}`,
+    empty: 'Nothing announced for this filter.',
+    partialWarning: (sources) => `Some publishers are unavailable right now (${sources}).`,
+  },
+
+  content: {
+    kinds: {
+      dlc: 'DLC',
+      expansion: 'Expansion',
+      season: 'Season',
+      patch: 'Patch',
+      update: 'Update',
+      pack: 'Pack',
+      set: 'Set',
+      launch: 'Launch',
+    },
+    nowTitle: 'Right now',
+    laterTitle: 'Later',
+    allGames: 'All',
+    filterLabel: 'Filter by game',
+    mythicPlusSeason: (number) => `Mythic+ · Season ${number}`,
+    patch: (number) => `Patch ${number}`,
+    ongoingUntil: (date) => `Running until ${date}`,
+    ongoingSince: (date) => `Running since ${date}`,
+    ongoing: 'Running',
+    emptyNow: 'Nothing new in the last few weeks.',
+    emptyMonth: 'Nothing announced yet.',
+    count: (count) => `${count} item${count === 1 ? '' : 's'}`,
+    intro:
+      'Seasons, DLC, expansions and patches for the games we follow. Publishers often announce seasons only a few weeks ahead, so far-off months fill up over time.',
+    partialWarning: (sources) => `Some sources are unavailable right now (${sources}).`,
+    tftSet: (number, name) => (name ? `Set ${number} · ${name}` : `Set ${number}`),
+    estimatedFromPatch: (patch) =>
+      `Estimated date: sets launch with a big patch, most likely patch ${patch} (official Riot schedule).`,
+    endOfYear: (year) => `Late ${year}`,
+    poe2Launch: (league) => (league ? `Version 1.0 · ${league}` : 'Version 1.0'),
+    poe2LaunchSummary: (league) =>
+      league
+        ? `Version 1.0 launch, with the new “${league}” league.`
+        : 'Version 1.0 launch, with a new league.',
+    patchNotes: 'Patch notes',
+    officialPage: 'Official page',
+  },
+
   mag: {
     issue: (monthLabel) => `Issue ${monthLabel}`,
     mostAnticipated: 'Most anticipated right now',
@@ -121,6 +174,7 @@ export const en: UiMessages = {
     released: 'Out',
     hype: 'hype!!',
     openDetails: (title) => `Open details for ${title}`,
+    fullRelease: '1.0 release',
   },
 
   a11y: {

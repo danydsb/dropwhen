@@ -3,7 +3,7 @@ import { useTranslation } from '../i18n'
 import type { Category } from '../types'
 import { CATEGORY_ICONS } from './CategoryIcon'
 
-const CATEGORIES: Category[] = ['games', 'comics']
+const CATEGORIES: Category[] = ['games', 'content', 'comics']
 
 export function SearchPanel({
   category,
@@ -16,6 +16,7 @@ export function SearchPanel({
   onCategoryChange: (category: Category) => void
   onQueryChange: (value: string) => void
 }) {
+  const showSearch = category !== 'content'
   const { ui } = useTranslation()
   const trimmedQuery = query.trim()
   const minLength = getMinSearchQueryLength(category)
@@ -48,6 +49,7 @@ export function SearchPanel({
             )
           })}
         </div>
+        {showSearch && (
         <input
           type="search"
           value={query}
@@ -57,6 +59,7 @@ export function SearchPanel({
           aria-label={ui.search.placeholder}
           className="min-w-[220px] flex-1 border-3 border-(--mag-ink) bg-white px-3 py-2 text-[15px] font-semibold shadow-[3px_3px_0_var(--mag-ink)] outline-none focus:shadow-[3px_3px_0_var(--mag-blue)]"
         />
+        )}
       </form>
       {isTooShort && (
         <p className="mt-2 text-xs font-semibold text-(--mag-muted)">

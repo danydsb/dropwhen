@@ -9,6 +9,10 @@ import { HeroSection } from './components/HeroSection'
 import { SearchPanel } from './components/SearchPanel'
 import { ResultList } from './components/ResultList'
 import { GamesCalendar } from './components/GamesCalendar'
+import { ContentCalendar } from './components/ContentCalendar'
+import { useContentCalendar } from './hooks/useContentCalendar'
+import { ComicsCalendar } from './components/ComicsCalendar'
+import { useComicsCalendar } from './hooks/useComicsCalendar'
 import { StatusBanner } from './components/StatusBanner'
 import { useSearch } from './hooks/useSearch'
 import { useGamesCalendar } from './hooks/useGamesCalendar'
@@ -34,6 +38,22 @@ function App() {
     error: calendarErrorState,
     reload: reloadCalendar,
   } = useGamesCalendar(showGamesCalendar)
+
+  const showContent = category === 'content' && !demoMode
+  const showComicsCalendar = category === 'comics' && !hasSearched && !demoMode
+  const {
+    items: comicsItems,
+    loading: comicsLoading,
+    warning: comicsWarning,
+    error: comicsError,
+  } = useComicsCalendar(showComicsCalendar)
+  const {
+    items: contentItems,
+    loading: contentLoading,
+    warning: contentWarning,
+    error: contentError,
+    reload: reloadContent,
+  } = useContentCalendar(showContent)
 
   const handleCategoryChange = useCallback(
     (next: Category) => {
@@ -74,10 +94,23 @@ function App() {
 
   useEffect(() => {
     if (showGamesCalendar) reloadCalendar()
-  }, [locale, showGamesCalendar, reloadCalendar])
+    if (showContent) reloadContent()
+  }, [locale, showGamesCalendar, reloadCalendar, showContent, reloadContent])
 
-  const activeWarning = showGamesCalendar ? calendarWarning : warning
-  const activeError = showGamesCalendar ? calendarErrorState : error
+  const activeWarning = showGamesCalendar
+    ? calendarWarning
+    : showContent
+      ? contentWarning
+      : showComicsCalendar
+        ? comicsWarning
+        : warning
+  const activeError = showGamesCalendar
+    ? calendarErrorState
+    : showContent
+      ? contentError
+      : showComicsCalendar
+        ? comicsError
+        : error
 
   return (
     <div className="relative min-h-dvh">
@@ -103,7 +136,11 @@ function App() {
           {activeError && <StatusBanner variant="error" message={activeError} />}
         </div>
 
-        {showGamesCalendar ? (
+        {showContent ? (
+          <ContentCalendar items={contentItems} loading={contentLoading} onOpen={setSelected} />
+        ) : showComicsCalendar ? (
+          <ComicsCalendar items={comicsItems} loading={comicsLoading} onOpen={setSelected} />
+        ) : showGamesCalendar ? (
           <GamesCalendar
             todayItems={calendarTodayItems}
             sections={calendarSections}

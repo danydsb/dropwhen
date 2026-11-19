@@ -6,12 +6,18 @@ import { CategoryIcon } from './CategoryIcon'
 /** Hype level from which a game gets the "hype !!" sticker. */
 export const HYPE_STICKER_THRESHOLD = 100
 
-export function getDateTag(item: ReleaseItem): { label: string; exact: boolean } {
+export function getDateTag(
+  item: ReleaseItem,
+  ongoingLabel?: string,
+): { label: string; exact: boolean } {
+  if (item.ongoing && ongoingLabel && (item.isReleased || !item.releaseDate)) {
+    return { label: ongoingLabel, exact: false }
+  }
   if (item.dateCertainty === 'confirmed' && item.releaseDate) {
     const short = formatShortDate(item.releaseDate) ?? ''
     // Day/month alone is only unambiguous for releases in the coming year.
     const days = daysUntil(item.releaseDate)
-    const nearFuture = days !== undefined && days >= -30 && days <= 365
+    const nearFuture = days !== undefined && days >= -60 && days <= 365
     return { label: nearFuture ? short : `${short}/${item.releaseDate.slice(2, 4)}`, exact: true }
   }
   return { label: item.releaseDateLabel ?? 'TBA', exact: false }
@@ -25,8 +31,8 @@ export function ReleaseCard({
   onOpen: (item: ReleaseItem) => void
 }) {
   const { ui } = useTranslation()
-  const tag = getDateTag(item)
-  const subtitle = item.developer ?? item.publisher ?? item.genres?.join(', ')
+  const tag = getDateTag(item, ui.content.ongoing)
+  const subtitle = item.parentTitle ?? item.developer ?? item.publisher ?? item.genres?.join(', ')
 
   return (
     <button
@@ -60,7 +66,7 @@ export function ReleaseCard({
         {tag.label}
       </span>
 
-      {item.isReleased ? (
+      {item.isReleased && !item.ongoing ? (
         <span className="absolute top-2 left-2 -rotate-3 border-2 border-(--mag-ink) bg-(--mag-green) px-2 py-0.5 text-xs font-extrabold text-white uppercase">
           {ui.mag.released}
         </span>

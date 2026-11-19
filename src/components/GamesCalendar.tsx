@@ -4,7 +4,7 @@ import { UPCOMING_MONTH_COUNT } from '../utils/calendar-months'
 import { daysUntil, formatDisplayDate, getTodayIso } from '../utils/dates'
 import { ReleaseCard, ReleaseCardSkeleton, ReleaseGrid } from './ReleaseCard'
 
-function SectionHeading({ title, count }: { title: string; count?: string }) {
+export function SectionHeading({ title, count }: { title: string; count?: string }) {
   return (
     <div className="mt-14 mb-5 flex items-center gap-3.5">
       <h3 className="font-anton text-[34px] leading-none uppercase sm:text-[46px]">{title}</h3>

@@ -3,6 +3,36 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { buildContentFeed } from './api/content-feed.ts'
+import { buildComicsUpcoming } from './api/comics-upcoming.ts'
+
+function contentFeedDevProxy(): Plugin {
+  return {
+    name: 'content-feed-dev-proxy',
+    configureServer(server) {
+      server.middlewares.use('/api/content-feed', async (req, res, next) => {
+        if (req.method !== 'GET') {
+          next()
+          return
+        }
+        const feed = await buildContentFeed()
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json; charset=utf-8')
+        res.end(JSON.stringify(feed))
+      })
+      server.middlewares.use('/api/comics-upcoming', async (req, res, next) => {
+        if (req.method !== 'GET') {
+          next()
+          return
+        }
+        const upcoming = await buildComicsUpcoming()
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json; charset=utf-8')
+        res.end(JSON.stringify(upcoming))
+      })
+    },
+  }
+}
 
 function urbanComicsDevProxy(): Plugin {
   return {
@@ -153,6 +183,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       urbanComicsDevProxy(),
+      contentFeedDevProxy(),
       igdbDevProxy({
         clientId: env.IGDB_CLIENT_ID,
         clientSecret: env.IGDB_CLIENT_SECRET,

@@ -26,5 +26,8 @@ export async function searchByCategory(
       return searchGames(trimmed)
     case 'comics':
       return searchComics(trimmed)
+    case 'content':
+      // The content tab is a timeline filtered client-side, not a search.
+      return { items: [] }
   }
 }

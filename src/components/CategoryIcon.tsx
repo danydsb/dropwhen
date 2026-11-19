@@ -1,14 +1,16 @@
-import { BookMarked, Gamepad2 } from 'lucide-react'
+import { BookMarked, Gamepad2, Layers } from 'lucide-react'
 import type { Category } from '../types'
 
 export const CATEGORY_ICONS = {
   games: Gamepad2,
   comics: BookMarked,
+  content: Layers,
 } as const
 
 const ICON_COLORS: Record<Category, string> = {
   games: 'text-games-light',
   comics: 'text-comics-light',
+  content: 'text-games-light',
 }
 
 export function CategoryIcon({

@@ -82,6 +82,41 @@ export type UiMessages = {
     link: (url: string) => string
     unknownDateNote: string
   }
+  comicsCalendar: {
+    title: string
+    intro: string
+    all: string
+    manga: string
+    bd: string
+    specialOnly: string
+    count: (count: number) => string
+    empty: string
+    partialWarning: (sources: string) => string
+  }
+  content: {
+    kinds: Record<'dlc' | 'expansion' | 'season' | 'patch' | 'update' | 'pack' | 'set' | 'launch', string>
+    nowTitle: string
+    laterTitle: string
+    allGames: string
+    filterLabel: string
+    mythicPlusSeason: (number: string) => string
+    patch: (number: string) => string
+    ongoingUntil: (date: string) => string
+    ongoingSince: (date: string) => string
+    ongoing: string
+    emptyNow: string
+    emptyMonth: string
+    count: (count: number) => string
+    intro: string
+    partialWarning: (sources: string) => string
+    tftSet: (number: string, name?: string) => string
+    estimatedFromPatch: (patch: string) => string
+    endOfYear: (year: string) => string
+    poe2Launch: (league?: string) => string
+    poe2LaunchSummary: (league?: string) => string
+    patchNotes: string
+    officialPage: string
+  }
   mag: {
     issue: (monthLabel: string) => string
     mostAnticipated: string
@@ -99,6 +134,7 @@ export type UiMessages = {
     released: string
     hype: string
     openDetails: (title: string) => string
+    fullRelease: string
   }
   a11y: {
     dismiss: string

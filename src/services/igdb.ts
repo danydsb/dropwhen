@@ -40,6 +40,8 @@ interface IgdbGameReleaseDate {
   date?: number
   /** 0 = exact day, 1 = month, 2 = year, 3-6 = Q1-Q4, 7 = TBD */
   date_format?: number
+  /** Release status id (3 = Early Access, 6 = Full Release…) */
+  status?: number
 }
 
 interface IgdbWebsite {
@@ -49,6 +51,7 @@ interface IgdbWebsite {
 
 interface IgdbGame {
   id: number
+  parent_game?: { id: number }
   hypes?: number
   summary?: string
   screenshots?: IgdbArtwork[]
@@ -83,6 +86,8 @@ const UPCOMING_MIN_HYPES = 10
 const ADULT_CONTENT_FILTER = 'themes != (42) & keywords != (2509,847)'
 
 const IGDB_WEBSITE_TYPE_STEAM = 13
+const IGDB_STATUS_EARLY_ACCESS = 3
+const IGDB_STATUS_FULL_RELEASE = 6
 const MAX_GALLERY_IMAGES = 12
 
 interface IgdbProxyError {
@@ -122,6 +127,20 @@ function getGalleryUrls(game: IgdbGame): string[] {
     .map((item) => toImageUrl(item, 't_1080p'))
     .filter((url): url is string => Boolean(url))
     .slice(0, MAX_GALLERY_IMAGES)
+}
+
+/** Date of the 1.0 release of a game that started in early access (ISO), if any. */
+function getFullReleaseDate(game: IgdbGame): string | undefined {
+  const timestamp = game.release_dates
+    ?.filter(
+      (item) =>
+        item.status === IGDB_STATUS_FULL_RELEASE &&
+        item.date &&
+        (!game.first_release_date || item.date > game.first_release_date),
+    )
+    .map((item) => item.date!)
+    .sort((a, b) => a - b)[0]
+  return toIsoDate(timestamp)
 }
 
 function getSteamUrl(game: IgdbGame): string | undefined {
@@ -353,7 +372,7 @@ function resolveIgdbWarning(error: unknown): string {
 }
 
 const GAME_FIELDS =
-  'name,slug,hypes,summary,screenshots.image_id,videos.video_id,websites.url,websites.type,first_release_date,release_dates.date,release_dates.date_format,game_type.id,game_type.type,cover.image_id,cover.url,cover.width,cover.height,artworks.image_id,artworks.url,artworks.width,artworks.height,genres.name,platforms.name,involved_companies.developer,involved_companies.porting,involved_companies.supporting,involved_companies.publisher,involved_companies.company.name'
+  'name,slug,hypes,summary,screenshots.image_id,videos.video_id,websites.url,websites.type,first_release_date,release_dates.date,release_dates.date_format,release_dates.status,game_type.id,game_type.type,cover.image_id,cover.url,cover.width,cover.height,artworks.image_id,artworks.url,artworks.width,artworks.height,genres.name,platforms.name,involved_companies.developer,involved_companies.porting,involved_companies.supporting,involved_companies.publisher,involved_companies.company.name'
 
 const UPCOMING_CACHE_TTL_MS = 60 * 60 * 1000
 const upcomingCache = new Map<string, { expiresAt: number; value: SearchResult }>()
@@ -390,10 +409,39 @@ async function fetchUpcomingGamesFromApi(start: string, end: string): Promise<Se
     'limit 500;',
   ].join(' ')
 
-  const unique = await igdbPost<IgdbGame[]>('games', query)
+  // Early-access games reaching 1.0 inside the window (e.g. Path of Exile 2): their
+  // first_release_date is years old, so they only show up through release_dates.
+  const fullReleaseQuery = [
+    `fields date,date_format,${GAME_FIELDS.split(',').map((field) => `game.${field}`).join(',')};`,
+    `where status = ${IGDB_STATUS_FULL_RELEASE} & date >= ${startTimestamp} & date <= ${endTimestamp} & date_format = (0,1) & game.first_release_date < ${startTimestamp} & game.game_type = ${IGDB_MAIN_GAME_TYPE_ID} & game.version_parent = null & game.hypes >= ${UPCOMING_MIN_HYPES} & ${ADULT_CONTENT_FILTER.replace(/(themes|keywords)/g, 'game.$1')};`,
+    'sort date asc;',
+    'limit 100;',
+  ].join(' ')
+
+  const [games, fullReleases] = await Promise.all([
+    igdbPost<IgdbGame[]>('games', query),
+    igdbPost<Array<{ date?: number; game?: IgdbGame }>>('release_dates', fullReleaseQuery).catch(() => []),
+  ])
+
+  const byId = new Map(games.map((game) => [game.id, mapIgdbGame(game)]))
+  for (const release of fullReleases) {
+    if (!release.game || !release.date || byId.has(release.game.id)) continue
+    // Only games coming out of early access — not ports / new platforms of released games.
+    const wasEarlyAccess = release.game.release_dates?.some(
+      (item) => item.status === IGDB_STATUS_EARLY_ACCESS,
+    )
+    if (!wasEarlyAccess) continue
+    byId.set(release.game.id, {
+      ...mapIgdbGame({ ...release.game, first_release_date: release.date }),
+      gameTypeLabel: ui.mag.fullRelease,
+    })
+  }
+  const unique = [...byId.values()].sort((a, b) =>
+    (a.releaseDate ?? '9999').localeCompare(b.releaseDate ?? '9999'),
+  )
 
   return {
-    items: unique.map(mapIgdbGame),
+    items: unique,
     warning: unique.length > 0 ? undefined : ui.warnings.gamesCalendarEmpty,
   }
 }
@@ -427,4 +475,59 @@ export async function fetchUpcomingGames(): Promise<SearchResult> {
 
   upcomingInFlight.set(cacheKey, promise)
   return promise
+}
+
+/** IGDB game_type ids treated as "content": DLC, expansion, standalone expansion, episode, season, pack, update. */
+export const IGDB_CONTENT_GAME_TYPES = [1, 2, 4, 6, 7, 13, 14] as const
+
+export interface IgdbContentItem {
+  parentIgdbId: number
+  gameTypeId?: number
+  item: ReleaseItem
+}
+
+/**
+ * DLC / seasons / expansions of the given base games released between two
+ * timestamps, plus the base games themselves (covers and visuals as fallback).
+ */
+export async function fetchIgdbContent(
+  parentIds: number[],
+  startTimestamp: number,
+  endTimestamp: number,
+): Promise<{
+  children: IgdbContentItem[]
+  parents: Map<number, ReleaseItem>
+  /** 1.0 release date of base games coming out of early access */
+  fullReleases: Map<number, string>
+}> {
+  const ids = parentIds.join(',')
+  const [children, parents] = await Promise.all([
+    igdbPost<IgdbGame[]>(
+      'games',
+      [
+        `fields ${GAME_FIELDS},parent_game.id;`,
+        `where parent_game = (${ids}) & game_type = (${IGDB_CONTENT_GAME_TYPES.join(',')}) & first_release_date >= ${startTimestamp} & first_release_date <= ${endTimestamp};`,
+        'sort first_release_date asc;',
+        'limit 300;',
+      ].join(' '),
+    ),
+    igdbPost<IgdbGame[]>('games', `fields ${GAME_FIELDS}; where id = (${ids}); limit ${parentIds.length};`),
+  ])
+
+  return {
+    children: children
+      .filter((game) => game.parent_game?.id)
+      .map((game) => ({
+        parentIgdbId: game.parent_game!.id,
+        gameTypeId: game.game_type?.id,
+        item: mapIgdbGame(game),
+      })),
+    parents: new Map(parents.map((game) => [game.id, mapIgdbGame(game)])),
+    fullReleases: new Map(
+      parents.flatMap((game) => {
+        const date = getFullReleaseDate(game)
+        return date ? [[game.id, date] as const] : []
+      }),
+    ),
+  }
 }
