@@ -1,11 +1,12 @@
 /**
- * Aggregates live-service content that IGDB does not cover (or covers badly):
- * - League of Legends: patch schedule (Riot support page) + direct patch notes links
- * - Teamfight Tactics: current / next set (number, name, patch notes) from the TFT news page
- * - World of Warcraft: Mythic+ seasons (Raider.IO) + dated announcements (Blizzard news)
- * - Diablo IV: latest patch notes article (Blizzard news)
- * - Path of Exile 1 & 2: patch notes / announcement threads (official forum)
- * - Path of Exile 2: current and upcoming league names (poe.ninja)
+ * Seasons, sets, patches and launches, from the publishers' OFFICIAL pages only:
+ * - Riot: League of Legends patch schedule + patch notes, Teamfight Tactics news (sets)
+ * - Blizzard news: World of Warcraft (Retail & Forever) and Diablo IV announcements, PTRs
+ * - Grinding Gear Games forum: Path of Exile 1 & 2 announcements and patch notes
+ *
+ * A season that is announced (named, PTR open…) but not dated yet is returned with
+ * `tbd: true` instead of a guessed date. All these pages allow automated access
+ * (checked in their robots.txt).
  *
  * Every source fails independently: a broken source only drops its own data.
  */
@@ -15,10 +16,10 @@ export const config = {
 
 export interface ContentFeedEntry {
   id: string
-  source: 'riot' | 'tft' | 'raiderio' | 'blizzard'
+  source: 'riot' | 'tft' | 'blizzard' | 'ggg'
   /** Key of the tracked game (see src/data/tracked-games.ts) */
   gameKey: string
-  kind: 'patch' | 'season' | 'set' | 'update'
+  kind: 'patch' | 'season' | 'set' | 'update' | 'launch'
   title: string
   /** Patch number ("26.24"), season number ("2") or TFT set number ("19") */
   number?: string
@@ -26,10 +27,10 @@ export interface ContentFeedEntry {
   name?: string
   /** ISO date (YYYY-MM-DD) */
   date?: string
-  /** The date is an estimate (e.g. next TFT set → next big patch) */
-  dateEstimated?: boolean
-  /** Patch the estimated date was derived from */
-  estimatedFromPatch?: string
+  /** Announced, date not published yet */
+  tbd?: boolean
+  /** Date of an official presentation (developer livestream…) of upcoming content */
+  previewDate?: string
   endDate?: string
   ongoing?: boolean
   /** Patch notes (or the most relevant official article) */
@@ -50,7 +51,6 @@ export interface ContentFeed {
     poe2PatchThreads: ForumThread[]
     poe2Announcements: ForumThread[]
   }
-  poe2Leagues: { current?: string; upcoming?: string }
   errors: string[]
 }
 
@@ -59,11 +59,9 @@ const LOL_SCHEDULE_URL =
   'https://support.riotgames.com/en-us/league-of-legends/gameplay/patch-schedule-league-of-legends'
 const LOL_PATCH_NOTES_URL = 'https://www.leagueoflegends.com/en-us/news/tags/patch-notes/'
 const TFT_NEWS_URL = 'https://teamfighttactics.leagueoflegends.com/en-us/news/'
-/** Raider.IO expansion ids: 11 = Midnight. 12 is probed so the next expansion shows up on its own. */
-const RAIDERIO_EXPANSIONS = [11, 12]
 const POE_FORUM = 'https://www.pathofexile.com'
-/** Days between a set's first article (PBE reveal) and its earliest plausible launch. */
-const TFT_MIN_PBE_DAYS = 14
+/** GGG forum threads whose body is read to find launch dates and league names. */
+const POE_BODIES_TO_READ = 3
 const CACHE_TTL_MS = 30 * 60 * 1000
 
 const MONTHS: Record<string, string> = {
@@ -256,92 +254,169 @@ async function fetchBlizzardFeed(slug: string, gameLabel: string): Promise<Blizz
   return articles
 }
 
-/** "Midnight: Echoes of the Worldcore Arrives on December 1" → dated update. */
-export function parseArrivalAnnouncement(
-  title: string,
-  today: string,
-): { name: string; date: string } | undefined {
-  const match = title.match(/^(.*?)\s+Arrives?\s+(?:on\s+)?([A-Z][a-z]+)\s+(\d{1,2})\b/)
-  const month = match ? MONTHS[match[2].toLowerCase()] : undefined
-  if (!match || !month) return undefined
+const MONTH_PATTERN =
+  '(January|February|March|April|May|June|July|August|September|October|November|December)'
+
+/** "December 1" → ISO date; a month already well past this year means next year. */
+function resolveMonthDay(monthName: string, day: string, today: string): string | undefined {
+  const month = MONTHS[monthName.toLowerCase()]
+  if (!month) return undefined
   const year = Number(today.slice(0, 4))
-  const candidate = `${year}-${month}-${match[3].padStart(2, '0')}`
-  // An announcement for "January 5" published in December is for next year.
-  const date = candidate < addDays(today, -60) ? `${year + 1}${candidate.slice(4)}` : candidate
-  return { name: match[1].trim(), date }
+  const candidate = `${year}-${month}-${day.padStart(2, '0')}`
+  return candidate < addDays(today, -60) ? `${year + 1}${candidate.slice(4)}` : candidate
 }
 
-async function fetchMythicPlusSeasons(): Promise<ContentFeedEntry[]> {
-  const today = todayIso()
-  const results = await Promise.allSettled(
-    RAIDERIO_EXPANSIONS.map(async (expansionId) => {
-      const response = await fetch(
-        `https://raider.io/api/v1/mythic-plus/static-data?expansion_id=${expansionId}`,
-        { headers: { 'User-Agent': USER_AGENT } },
-      )
-      if (!response.ok) return []
-      const data = (await response.json()) as {
-        seasons?: Array<{ slug: string; starts?: Record<string, string | null>; ends?: Record<string, string | null> }>
-      }
-      return data.seasons ?? []
-    }),
+/**
+ * Official titles that carry their own date:
+ * "Midnight: Echoes of the Worldcore Arrives on December 1",
+ * "The Shadows Deepen: Midnight Season 2 Begins August 18",
+ * "Play Path of Exile: Covens of Umbra on November 13 PST".
+ */
+export function parseDatedTitle(title: string, today: string): { name: string; date: string } | undefined {
+  const verb = title.match(
+    new RegExp(`^(.*?)\\s+(?:Arrives?|Begins?|Launch(?:es)?|Starts?|Unlocks?|Goes Live|Returns?)\\s+(?:on\\s+)?${MONTH_PATTERN}\\s+(\\d{1,2})\\b`, 'i'),
   )
-
-  const entries: ContentFeedEntry[] = []
-  for (const result of results) {
-    if (result.status !== 'fulfilled') continue
-    for (const season of result.value) {
-      // Main seasons only (drops "break the meta", cutoffs, remix variants…)
-      const seasonNumber = season.slug.match(/^season-[a-z]+-(\d+)$/)?.[1]
-      const start = (season.starts?.eu ?? season.starts?.us)?.slice(0, 10)
-      if (!seasonNumber || !start) continue
-      const end = season.ends?.eu ?? season.ends?.us ?? undefined
-      // Raider.IO uses a far-future placeholder while the end date is unknown.
-      const knownEnd = end && !end.startsWith('2030') ? end.slice(0, 10) : undefined
-
-      entries.push({
-        id: `raiderio-${season.slug}`,
-        source: 'raiderio',
-        gameKey: 'wow',
-        kind: 'season',
-        title: `Mythic+ Season ${seasonNumber}`,
-        number: seasonNumber,
-        date: start,
-        endDate: knownEnd,
-        ongoing: start <= today && (!knownEnd || knownEnd > today),
-        url: `https://raider.io/mythic-plus-rankings/${season.slug}/world/all/leaderboards`,
-      })
-    }
-  }
-  return entries
+  const play = title.match(new RegExp(`^Play\\s+(.*?)\\s+on\\s+${MONTH_PATTERN}\\s+(\\d{1,2})\\b`, 'i'))
+  const match = verb ?? play
+  if (!match) return undefined
+  const date = resolveMonthDay(match[2], match[3], today)
+  // "The Shadows Deepen: Midnight Season 2" → keep the part naming the content.
+  const name = match[1].replace(/^.*?:\s*(?=.*Season \d+)/i, '').trim()
+  return date && name ? { name, date } : undefined
 }
 
-/* ---------------- Path of Exile ---------------- */
-
-async function fetchForumThreads(forum: string): Promise<ForumThread[]> {
-  const html = await fetchText(`${POE_FORUM}/forum/view-forum/${forum}`)
-  return [...html.matchAll(/<div class="title">\s*<a href="(\/forum\/view-thread\/\d+)"[^>]*>([\s\S]*?)<\/a>/g)]
-    .map((match) => ({ title: stripTags(match[2]), url: `${POE_FORUM}${match[1]}` }))
-    .slice(0, 25)
+async function fetchArticleText(url: string): Promise<string> {
+  return stripTags((await fetchText(url)).replace(/<script[\s\S]*?<\/script>/gi, ''))
 }
 
-async function fetchPoe2Leagues(): Promise<{ current?: string; upcoming?: string }> {
-  const response = await fetch('https://poe.ninja/poe2/api/data/index-state', {
-    headers: { 'User-Agent': USER_AGENT },
+function blizzardEntries(articles: BlizzardArticle[], gameKey: string, today: string): ContentFeedEntry[] {
+  return articles.flatMap((article) => {
+    const dated = parseDatedTitle(article.title, today)
+    if (!dated) return []
+    const season = dated.name.match(/Season (\d+)/i)?.[1]
+    return [
+      {
+        id: `blizzard-${article.url.match(/article\/(\d+)/)?.[1] ?? dated.name}`,
+        source: 'blizzard' as const,
+        gameKey: gameKey === 'wow' && /forever/i.test(article.title) ? 'wow-forever' : gameKey,
+        kind: season ? ('season' as const) : ('update' as const),
+        title: dated.name,
+        number: season,
+        date: dated.date,
+        url: article.url,
+      },
+    ]
   })
-  if (!response.ok) throw new Error(`poe.ninja HTTP ${response.status}`)
-  const data = (await response.json()) as {
-    economyLeagues?: Array<{ name: string; hardcore: boolean; indexed: boolean }>
+}
+
+/**
+ * Diablo IV announces a season through its PTR ("The 3.3.0 PTR … for Diablo IV's Season 16")
+ * weeks before giving a date. No dated article for that season yet → TBD entry.
+ */
+async function diabloUpcomingSeason(
+  articles: BlizzardArticle[],
+  dated: ContentFeedEntry[],
+  today: string,
+): Promise<ContentFeedEntry[]> {
+  const ptr = articles.find((article) => /\bPTR\b/.test(article.title))
+  if (!ptr) return []
+  const ptrText = await fetchArticleText(ptr.url)
+  const season = ptrText.match(/Season (\d+)/)?.[1]
+  if (!season || dated.some((entry) => entry.number === season)) return []
+
+  // An announced developer livestream presents the season (and usually its date).
+  const livestream = articles.find((article) => /livestream/i.test(article.title))
+  let previewDate: string | undefined
+  if (livestream) {
+    const text = await fetchArticleText(livestream.url).catch(() => '')
+    const match = text.match(new RegExp(`(?:begins|starts|live)\\s+on\\s+${MONTH_PATTERN}\\s+(\\d{1,2})`, 'i'))
+    previewDate = match ? resolveMonthDay(match[1], match[2], today) : undefined
+    if (previewDate && previewDate < today) previewDate = undefined
   }
-  // Newest leagues come first; a league listed before the indexed one is not live yet.
-  const leagues = (data.economyLeagues ?? []).filter(
-    (league) => !league.hardcore && !/^(standard|hardcore)$/i.test(league.name),
+
+  return [
+    {
+      id: `blizzard-d4-season-${season}`,
+      source: 'blizzard',
+      gameKey: 'd4',
+      kind: 'season',
+      title: `Season ${season}`,
+      number: season,
+      tbd: true,
+      previewDate,
+      url: ptr.url,
+    },
+  ]
+}
+
+/* ---------------- Path of Exile (Grinding Gear Games forum) ---------------- */
+
+interface ForumThreadWithDate extends ForumThread {
+  postedAt?: string
+}
+
+async function fetchForumThreads(forum: string): Promise<ForumThreadWithDate[]> {
+  const html = await fetchText(`${POE_FORUM}/forum/view-forum/${forum}`)
+  return [
+    ...html.matchAll(
+      /<div class="title">\s*<a href="(\/forum\/view-thread\/\d+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<span class="post_date">([^<]*)<\/span>/g,
+    ),
+  ]
+    .map((match) => ({ title: stripTags(match[2]), url: `${POE_FORUM}${match[1]}`, postedAt: match[3].trim() }))
+    .slice(0, 30)
+}
+
+/**
+ * - "Play Path of Exile: Covens of Umbra on November 13 PST" → dated PoE 1 league
+ * - Announcement posts ("ExileCon 2026 Announcements", "… Full Reveal") are read for
+ *   "Path of Exile 2 goes free-to-play on December 11" and "the new X Challenge League".
+ */
+async function poeEntries(threads: ForumThreadWithDate[], today: string): Promise<ContentFeedEntry[]> {
+  const entries: ContentFeedEntry[] = []
+
+  for (const thread of threads) {
+    const dated = parseDatedTitle(thread.title, today)
+    if (!dated) continue
+    const isPoe2 = /Path of Exile 2/i.test(dated.name)
+    const league = dated.name.replace(/^Path of Exile(?: [12])?:\s*/i, '').replace(/\s+for free$/i, '').trim()
+    entries.push({
+      id: `ggg-${thread.url.match(/\d+$/)?.[0] ?? league}`,
+      source: 'ggg',
+      gameKey: isPoe2 ? 'poe2' : 'poe',
+      kind: 'season',
+      title: league,
+      date: dated.date,
+      url: thread.url,
+    })
+  }
+
+  const announcements = threads
+    .filter((thread) => /announcements|reveal|full release|launch/i.test(thread.title))
+    .slice(0, POE_BODIES_TO_READ)
+  const bodies = await Promise.all(
+    announcements.map(async (thread) => ({ thread, text: await fetchArticleText(thread.url).catch(() => '') })),
   )
-  const currentIndex = leagues.findIndex((league) => league.indexed)
-  return {
-    current: currentIndex >= 0 ? leagues[currentIndex].name : undefined,
-    upcoming: currentIndex > 0 ? leagues[currentIndex - 1].name : undefined,
+  for (const { thread, text } of bodies) {
+    const launch = text.match(
+      new RegExp(`Path of Exile 2[^.]{0,60}?(?:goes free-to-play|launches|releases|is out)[^.]{0,30}?on\\s+${MONTH_PATTERN}\\s+(\\d{1,2})`, 'i'),
+    )
+    if (!launch || entries.some((entry) => entry.kind === 'launch')) continue
+    const date = resolveMonthDay(launch[1], launch[2], today)
+    if (!date || date < today) continue
+    const league = text.match(/new ([A-Z][\w’' ]{2,40}?) Challenge League/)?.[1]
+    entries.push({
+      id: 'ggg-poe2-launch',
+      source: 'ggg',
+      gameKey: 'poe2',
+      kind: 'launch',
+      title: '1.0',
+      name: league,
+      date,
+      url: thread.url,
+    })
   }
+
+  return entries
 }
 
 /* ---------------- Assembly ---------------- */
@@ -358,18 +433,17 @@ export async function buildContentFeed(): Promise<ContentFeed> {
   if (cache && cache.expiresAt > Date.now()) return cache.value
 
   const today = todayIso()
-  const [schedule, lolNotes, tft, raiderio, d4, wow, poe1, poe2Patches, poe2News, poe2Leagues] =
+  const [schedule, lolNotes, tft, d4, wow, poePatchNotes, poe2PatchNotes, poe2News, poeNews] =
     await Promise.allSettled([
       fetchText(LOL_SCHEDULE_URL).then(parseRiotSchedule),
       fetchLolPatchNotes(),
       fetchTftSets(),
-      fetchMythicPlusSeasons(),
       fetchBlizzardFeed('diablo-4', 'Diablo IV'),
       fetchBlizzardFeed('world-of-warcraft', 'World of Warcraft'),
       fetchForumThreads('patch-notes'),
       fetchForumThreads('2212'),
       fetchForumThreads('2211'),
-      fetchPoe2Leagues(),
+      fetchForumThreads('news'),
     ])
 
   const errors: string[] = []
@@ -378,6 +452,8 @@ export async function buildContentFeed(): Promise<ContentFeed> {
   const tftSets = settled(tft, {} as TftSets, errors, 'TFT')
   const wowArticles = settled(wow, [], errors, 'Blizzard WoW')
   const d4Articles = settled(d4, [], errors, 'Blizzard Diablo')
+  const poe2Announcements = settled(poe2News, [], errors, 'PoE2 forum')
+  const poeAnnouncements = settled(poeNews, [], errors, 'PoE forum')
 
   const entries: ContentFeedEntry[] = []
 
@@ -409,10 +485,7 @@ export async function buildContentFeed(): Promise<ContentFeed> {
     })
   }
   if (tftSets.next) {
-    // A set launches with a big patch: the first scheduled patch at least two weeks after its reveal.
-    const launchPatch = scheduleRows.find(
-      (row) => row.date >= addDays(tftSets.next!.firstSeen, TFT_MIN_PBE_DAYS) && row.date >= today,
-    )
+    // Riot reveals the next set (name, PBE) before dating it: no guessed date.
     entries.push({
       id: `tft-set-${tftSets.next.number}`,
       source: 'tft',
@@ -421,28 +494,16 @@ export async function buildContentFeed(): Promise<ContentFeed> {
       title: `Set ${tftSets.next.number}`,
       number: String(tftSets.next.number),
       name: tftSets.next.name,
-      date: launchPatch?.date,
-      dateEstimated: Boolean(launchPatch),
-      estimatedFromPatch: launchPatch?.patch,
+      tbd: true,
       url: tftSets.next.url,
     })
   }
 
-  entries.push(...settled(raiderio, [], errors, 'Raider.IO'))
-
-  for (const article of wowArticles) {
-    const announcement = parseArrivalAnnouncement(article.title, today)
-    if (!announcement) continue
-    entries.push({
-      id: `blizzard-${article.url.match(/article\/(\d+)/)?.[1] ?? announcement.name}`,
-      source: 'blizzard',
-      gameKey: 'wow',
-      kind: 'update',
-      title: announcement.name,
-      date: announcement.date,
-      url: article.url,
-    })
-  }
+  entries.push(...blizzardEntries(wowArticles, 'wow', today))
+  const d4Dated = blizzardEntries(d4Articles, 'd4', today)
+  entries.push(...d4Dated)
+  entries.push(...(await diabloUpcomingSeason(d4Articles, d4Dated, today).catch(() => [])))
+  entries.push(...(await poeEntries([...poeAnnouncements, ...poe2Announcements], today).catch(() => [])))
 
   const isPatchNotes = (article: BlizzardArticle) => /patch-notes|content-update-notes/i.test(article.url)
 
@@ -451,11 +512,10 @@ export async function buildContentFeed(): Promise<ContentFeed> {
     links: {
       d4PatchNotes: d4Articles.find(isPatchNotes)?.url,
       wowPatchNotes: wowArticles.find(isPatchNotes)?.url,
-      poe1PatchThreads: settled(poe1, [], errors, 'PoE forum'),
-      poe2PatchThreads: settled(poe2Patches, [], errors, 'PoE2 forum'),
-      poe2Announcements: settled(poe2News, [], errors, 'PoE2 forum'),
+      poe1PatchThreads: settled(poePatchNotes, [], errors, 'PoE forum'),
+      poe2PatchThreads: settled(poe2PatchNotes, [], errors, 'PoE2 forum'),
+      poe2Announcements,
     },
-    poe2Leagues: settled(poe2Leagues, {}, errors, 'poe.ninja'),
     errors: [...new Set(errors)],
   }
 

@@ -129,20 +129,6 @@ function getGalleryUrls(game: IgdbGame): string[] {
     .slice(0, MAX_GALLERY_IMAGES)
 }
 
-/** Date of the 1.0 release of a game that started in early access (ISO), if any. */
-function getFullReleaseDate(game: IgdbGame): string | undefined {
-  const timestamp = game.release_dates
-    ?.filter(
-      (item) =>
-        item.status === IGDB_STATUS_FULL_RELEASE &&
-        item.date &&
-        (!game.first_release_date || item.date > game.first_release_date),
-    )
-    .map((item) => item.date!)
-    .sort((a, b) => a - b)[0]
-  return toIsoDate(timestamp)
-}
-
 function getSteamUrl(game: IgdbGame): string | undefined {
   return game.websites?.find(
     (site) => site.type === IGDB_WEBSITE_TYPE_STEAM || site.url?.includes('store.steampowered.com'),
@@ -477,8 +463,11 @@ export async function fetchUpcomingGames(): Promise<SearchResult> {
   return promise
 }
 
-/** IGDB game_type ids treated as "content": DLC, expansion, standalone expansion, episode, season, pack, update. */
-export const IGDB_CONTENT_GAME_TYPES = [1, 2, 4, 6, 7, 13, 14] as const
+/**
+ * IGDB game_type ids treated as "content": DLC, expansion, standalone expansion, pack.
+ * Seasons / updates are left out on purpose: they come from official publisher pages.
+ */
+export const IGDB_CONTENT_GAME_TYPES = [1, 2, 4, 13] as const
 
 export interface IgdbContentItem {
   parentIgdbId: number
@@ -497,8 +486,6 @@ export async function fetchIgdbContent(
 ): Promise<{
   children: IgdbContentItem[]
   parents: Map<number, ReleaseItem>
-  /** 1.0 release date of base games coming out of early access */
-  fullReleases: Map<number, string>
 }> {
   const ids = parentIds.join(',')
   const [children, parents] = await Promise.all([
@@ -523,11 +510,5 @@ export async function fetchIgdbContent(
         item: mapIgdbGame(game),
       })),
     parents: new Map(parents.map((game) => [game.id, mapIgdbGame(game)])),
-    fullReleases: new Map(
-      parents.flatMap((game) => {
-        const date = getFullReleaseDate(game)
-        return date ? [[game.id, date] as const] : []
-      }),
-    ),
   }
 }

@@ -40,8 +40,6 @@ export interface ReleaseItem {
   specialEdition?: string
   /** Kind of content (content tab only) */
   contentKind?: 'dlc' | 'expansion' | 'season' | 'patch' | 'update' | 'pack' | 'set' | 'launch'
-  /** Estimated date that is still precise to the day (e.g. next TFT set) */
-  approximateDay?: boolean
   /** End of a season, when known (ISO date) */
   endDate?: string
   /** IGDB follows before release — popularity signal */

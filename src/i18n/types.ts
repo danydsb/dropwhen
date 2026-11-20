@@ -110,7 +110,11 @@ export type UiMessages = {
     intro: string
     partialWarning: (sources: string) => string
     tftSet: (number: string, name?: string) => string
-    estimatedFromPatch: (patch: string) => string
+    season: (number: string) => string
+    tbd: string
+    tbdLong: string
+    tbdSummary: string
+    previewOn: (date: string) => string
     endOfYear: (year: string) => string
     poe2Launch: (league?: string) => string
     poe2LaunchSummary: (league?: string) => string

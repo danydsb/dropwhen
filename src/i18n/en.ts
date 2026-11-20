@@ -145,8 +145,11 @@ export const en: UiMessages = {
       'Seasons, DLC, expansions and patches for the games we follow. Publishers often announce seasons only a few weeks ahead, so far-off months fill up over time.',
     partialWarning: (sources) => `Some sources are unavailable right now (${sources}).`,
     tftSet: (number, name) => (name ? `Set ${number} · ${name}` : `Set ${number}`),
-    estimatedFromPatch: (patch) =>
-      `Estimated date: sets launch with a big patch, most likely patch ${patch} (official Riot schedule).`,
+    season: (number) => `Season ${number}`,
+    tbd: 'TBD',
+    tbdLong: 'Date to be announced (TBD)',
+    tbdSummary: 'Officially announced, but the date has not been published yet.',
+    previewOn: (date) => `Official presentation scheduled on ${date}.`,
     endOfYear: (year) => `Late ${year}`,
     poe2Launch: (league) => (league ? `Version 1.0 · ${league}` : 'Version 1.0'),
     poe2LaunchSummary: (league) =>

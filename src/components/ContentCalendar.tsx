@@ -51,11 +51,14 @@ export function ContentCalendar({
       } else if (days !== undefined && days > 0) {
         const key = item.releaseDate!.slice(0, 7)
         // Vague dates (year / quarter) and far-off ones go to "Later".
-        if ((item.dateCertainty === 'confirmed' || item.approximateDay) && key <= lastMonthKey && byMonth.has(key)) {
+        if (item.dateCertainty === 'confirmed' && key <= lastMonthKey && byMonth.has(key)) {
           byMonth.get(key)!.push(item)
         } else {
           later.push(item)
         }
+      } else if (!item.releaseDate) {
+        // Announced but not dated yet (TBD).
+        later.push(item)
       }
     }
 

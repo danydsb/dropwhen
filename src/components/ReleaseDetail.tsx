@@ -201,7 +201,9 @@ export function ReleaseDetail({
                   ? ui.content.ongoingUntil(formatDisplayDate(item.endDate))
                   : item.ongoing && item.releaseDate
                     ? ui.content.ongoingSince(formatDisplayDate(item.releaseDate))
-                    : item.releaseDateLabel}
+                    : item.category === 'content' && !item.releaseDate && !item.ongoing
+                      ? ui.content.tbdLong
+                      : item.releaseDateLabel}
                 {days !== undefined && days > 0 ? ` · ${ui.mag.countdown(days)}` : ''}
               </p>
             </div>

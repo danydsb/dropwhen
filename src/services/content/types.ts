@@ -3,15 +3,17 @@ export type ContentKind = 'dlc' | 'expansion' | 'season' | 'patch' | 'update' | 
 /** Mirror of the payload returned by /api/content-feed (api/content-feed.ts). */
 export interface ContentFeedEntry {
   id: string
-  source: 'riot' | 'tft' | 'raiderio' | 'blizzard'
+  source: 'riot' | 'tft' | 'blizzard' | 'ggg'
   gameKey: string
-  kind: 'patch' | 'season' | 'set' | 'update'
+  kind: 'patch' | 'season' | 'set' | 'update' | 'launch'
   title: string
   number?: string
   name?: string
   date?: string
-  dateEstimated?: boolean
-  estimatedFromPatch?: string
+  /** Announced, date not published yet */
+  tbd?: boolean
+  /** Official presentation of the upcoming content (developer livestream…) */
+  previewDate?: string
   endDate?: string
   ongoing?: boolean
   url?: string
@@ -31,7 +33,6 @@ export interface ContentFeed {
     poe2PatchThreads: ForumThread[]
     poe2Announcements: ForumThread[]
   }
-  poe2Leagues: { current?: string; upcoming?: string }
   errors: string[]
 }
 

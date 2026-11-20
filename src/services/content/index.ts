@@ -2,7 +2,7 @@ import { getLocale, getUi } from '../../i18n'
 import { MANUAL_CONTENT } from '../../data/manual-content'
 import { TRACKED_GAMES, type TrackedGame } from '../../data/tracked-games'
 import type { ReleaseItem } from '../../types'
-import { formatDisplayDate, formatShortDate, getTodayIso, isPastRelease } from '../../utils/dates'
+import { formatDisplayDate, getTodayIso, isPastRelease } from '../../utils/dates'
 import { fetchIgdbContent, type IgdbContentItem } from '../igdb'
 import type { ContentFeed, ContentFeedEntry, ContentKind, ManualContentEntry } from './types'
 
@@ -13,23 +13,17 @@ const SEASON_RUNNING_DAYS = 120
 /** How far ahead we look (items past the month sections land in "Later"). */
 const LOOKAHEAD_MONTHS = 18
 
-const POE2_IGDB_ID = 125642
-const POE2_SITE = 'https://pathofexile2.com'
 
 const IGDB_TYPE_TO_KIND: Record<number, ContentKind> = {
   1: 'dlc',
   2: 'expansion',
   4: 'expansion',
-  6: 'season',
-  7: 'season',
   13: 'pack',
-  14: 'update',
 }
 
 const EMPTY_FEED: ContentFeed = {
   entries: [],
   links: { poe1PatchThreads: [], poe2PatchThreads: [], poe2Announcements: [] },
-  poe2Leagues: {},
   errors: [],
 }
 
@@ -191,95 +185,62 @@ function fromIgdb(
   }
 }
 
-function fromFeed(entry: ContentFeedEntry, parents: Map<number, ReleaseItem>): ReleaseItem {
-  const ui = getUi()
-  const game = findGame(entry.gameKey)
-  const source = { riot: 'Riot Games', tft: 'Riot Games', raiderio: 'Raider.IO', blizzard: 'Blizzard' }[
-    entry.source
-  ]
-  const isOfficialPage = entry.kind === 'set' && !entry.ongoing
-  const notesUrl = localizeUrl(entry.url)
+const SOURCE_NAMES: Record<ContentFeedEntry['source'], string> = {
+  riot: 'Riot Games',
+  tft: 'Riot Games',
+  blizzard: 'Blizzard',
+  ggg: 'Grinding Gear Games',
+}
 
-  const fields = {
-    ...baseItem(game, parents),
+function feedTitle(entry: ContentFeedEntry): string {
+  const ui = getUi()
+  if (entry.kind === 'patch' && entry.number) return ui.content.patch(entry.number)
+  if (entry.kind === 'set' && entry.number) return ui.content.tftSet(entry.number, entry.name)
+  if (entry.kind === 'launch' && entry.gameKey === 'poe2') return ui.content.poe2Launch(entry.name)
+  if (entry.kind === 'season' && entry.number && /^Season \d+$/i.test(entry.title)) {
+    return ui.content.season(entry.number)
+  }
+  return entry.title
+}
+
+/** Direct patch notes / official article for an entry of the official feed. */
+function feedNotesUrl(entry: ContentFeedEntry, feed: ContentFeed): string | undefined {
+  const url = localizeUrl(entry.url)
+  // Riot's schedule page is a fallback, not patch notes.
+  if (entry.source === 'riot') return url?.includes('/news/') ? url : undefined
+  if (entry.source === 'ggg' && entry.gameKey === 'poe' && entry.kind === 'season') {
+    return findNotesUrl('poe', entry.title, feed) ?? url
+  }
+  return url
+}
+
+function fromFeed(entry: ContentFeedEntry, parents: Map<number, ReleaseItem>, feed: ContentFeed): ReleaseItem {
+  const ui = getUi()
+  const notesUrl = feedNotesUrl(entry, feed)
+  const isPatchNotes = entry.kind === 'patch' || (entry.kind === 'set' && entry.ongoing) || notesUrl !== localizeUrl(entry.url)
+  const summary = [
+    entry.kind === 'launch' && entry.gameKey === 'poe2' ? ui.content.poe2LaunchSummary(entry.name) : undefined,
+    entry.tbd ? ui.content.tbdSummary : undefined,
+    entry.previewDate ? ui.content.previewOn(formatDisplayDate(entry.previewDate)) : undefined,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  return contentItem({
+    ...baseItem(findGame(entry.gameKey), parents),
     id: `content-${entry.id}`,
-    source,
-    sourceUrl: notesUrl,
-    // Direct patch notes when Riot has published them; the schedule page otherwise.
-    notesUrl: notesUrl?.includes('/news/') || entry.source !== 'riot' ? notesUrl : undefined,
-    notesLabel: isOfficialPage || entry.source === 'blizzard' ? ui.content.officialPage : undefined,
+    title: feedTitle(entry),
+    contentKind: entry.kind,
+    source: SOURCE_NAMES[entry.source],
+    sourceUrl: localizeUrl(entry.url),
+    notesUrl,
+    notesLabel: isPatchNotes ? undefined : ui.content.officialPage,
+    summary: summary || undefined,
     releaseDate: entry.date,
     endDate: entry.endDate,
     ongoing: entry.ongoing,
-    contentKind: entry.kind,
-  }
-
-  if (entry.kind === 'set' && entry.number) {
-    const estimated = entry.dateEstimated && entry.date
-    return contentItem({
-      ...fields,
-      title: ui.content.tftSet(entry.number, entry.name),
-      ...(estimated
-        ? {
-            dateCertainty: 'estimated' as const,
-            approximateDay: true,
-            releaseDateLabel: `~${formatShortDate(entry.date)}`,
-            summary: entry.estimatedFromPatch ? ui.content.estimatedFromPatch(entry.estimatedFromPatch) : undefined,
-          }
-        : {}),
-    })
-  }
-
-  const title =
-    entry.kind === 'patch' && entry.number
-      ? ui.content.patch(entry.number)
-      : entry.source === 'raiderio' && entry.number
-        ? ui.content.mythicPlusSeason(entry.number)
-        : entry.title
-  return contentItem({ ...fields, title })
-}
-
-/** Path of Exile 2: 1.0 launch (IGDB) + league names (poe.ninja) + forum links. */
-function poe2Items(fullReleaseDate: string | undefined, parents: Map<number, ReleaseItem>, feed: ContentFeed, today: string): ReleaseItem[] {
-  const ui = getUi()
-  const game = findGame('poe2')
-  const items: ReleaseItem[] = []
-  const { current, upcoming } = feed.poe2Leagues
-  const latestPatchNotes = feed.links.poe2PatchThreads.find((thread) => /patch notes/i.test(thread.title))
-
-  if (fullReleaseDate && fullReleaseDate >= today) {
-    const announcement = feed.links.poe2Announcements.find((thread) => /full release|1\.0/i.test(thread.title))
-    items.push(
-      contentItem({
-        ...baseItem(game, parents),
-        id: 'content-poe2-launch',
-        title: ui.content.poe2Launch(upcoming),
-        summary: ui.content.poe2LaunchSummary(upcoming),
-        contentKind: 'launch',
-        releaseDate: fullReleaseDate,
-        source: 'Grinding Gear Games',
-        sourceUrl: announcement?.url ?? POE2_SITE,
-        notesUrl: announcement?.url ?? POE2_SITE,
-        notesLabel: ui.content.officialPage,
-      }),
-    )
-  }
-
-  if (current) {
-    items.push(
-      contentItem({
-        ...baseItem(game, parents),
-        id: `content-poe2-league-${current}`,
-        title: current,
-        contentKind: 'season',
-        ongoing: true,
-        source: 'Grinding Gear Games',
-        sourceUrl: latestPatchNotes?.url ?? POE2_SITE,
-        notesUrl: latestPatchNotes?.url,
-      }),
-    )
-  }
-  return items
+    ...(entry.tbd ? { dateCertainty: 'unknown' as const, releaseDateLabel: ui.content.tbd } : {}),
+  })
 }
 
 function fromManual(entry: ManualContentEntry, parents: Map<number, ReleaseItem>, index: number): ReleaseItem {
@@ -355,7 +316,7 @@ export async function fetchTrackedContent(): Promise<ContentResult> {
 
   const failedSources: string[] = []
   const feed = feedResult.status === 'fulfilled' ? feedResult.value : EMPTY_FEED
-  if (feedResult.status === 'rejected') failedSources.push('Riot, Blizzard, Raider.IO, PoE')
+  if (feedResult.status === 'rejected') failedSources.push('Riot, Blizzard, Grinding Gear Games')
   failedSources.push(...feed.errors)
 
   const parents = igdb.status === 'fulfilled' ? igdb.value.parents : new Map<number, ReleaseItem>()
@@ -371,13 +332,10 @@ export async function fetchTrackedContent(): Promise<ContentResult> {
   }
 
   for (const entry of feed.entries) {
-    const item = fromFeed(entry, parents)
+    const item = fromFeed(entry, parents, feed)
     // Old patches/seasons are noise; keep recent ones and anything still running.
     if (item.ongoing || !item.releaseDate || item.releaseDate >= seasonStart) items.push(item)
   }
-
-  const poe2FullRelease = igdb.status === 'fulfilled' ? igdb.value.fullReleases.get(POE2_IGDB_ID) : undefined
-  items.push(...poe2Items(poe2FullRelease, parents, feed, today))
 
   MANUAL_CONTENT.forEach((entry, index) => items.push(fromManual(entry, parents, index)))
 
